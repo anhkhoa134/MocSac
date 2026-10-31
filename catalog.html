@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bộ Sưu Tập Đầy Đủ (35 Tác Phẩm) | Mộc & Sắc Atelier</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        linen: '#F6F2EA',
+                        rawcanvas: '#EAE6DF',
+                        slateart: '#23262A',
+                        terracotta: '#C86D51',
+                        ochre: '#D49B35',
+                        cerulean: '#1D5B8C',
+                        sage: '#4A6B5D',
+                        blossom: '#E07A9B'
+                    },
+                    fontFamily: {
+                        serif: ['"Be Vietnam Pro"', 'sans-serif'],
+                        sans: ['"Be Vietnam Pro"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F6F2EA;
+            color: #1E2024;
+            font-family: 'Be Vietnam Pro', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        .font-editorial {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            letter-spacing: -0.02em;
+        }
+        .glass-nav {
+            background: rgba(246, 242, 234, 0.94);
+            backdrop-filter: blur(12px);
+        }
+        .impasto-card-img {
+            filter: contrast(1.04) brightness(0.99);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+        .frame-classic {
+            border: 14px solid #1E2024;
+            outline: 2px solid #D49B35;
+            outline-offset: -8px;
+            box-shadow: 12px 20px 40px rgba(0,0,0,0.4), -2px -2px 8px rgba(255,255,255,0.15);
+            border-radius: 4px;
+        }
+    
+        /* Custom Dropdown & Luxury Select Styling */
+        .custom-dropdown-ui {
+            user-select: none;
+        }
+        .custom-dropdown-trigger {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .custom-dropdown-trigger:hover {
+            border-color: #B2533E;
+            box-shadow: 0 4px 12px rgba(178, 83, 62, 0.08);
+        }
+        .custom-dropdown-menu {
+            animation: customDropdownFade 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes customDropdownFade {
+            from {
+                opacity: 0;
+                transform: translateY(-6px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .custom-dropdown-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-dropdown-menu::-webkit-scrollbar-track {
+            background: #F6F2EA;
+            border-radius: 9999px;
+        }
+        .custom-dropdown-menu::-webkit-scrollbar-thumb {
+            background: #D8D2C5;
+            border-radius: 9999px;
+        }
+        .custom-dropdown-menu::-webkit-scrollbar-thumb:hover {
+            background: #B2533E;
+        }
+        /* Fallback Native Select Customization */
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2378716c'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.85rem center;
+            background-size: 1rem 1rem;
+            padding-right: 2.5rem !important;
+            cursor: pointer;
+        }
+        select option {
+            background-color: #FAF7F2;
+            color: #1E2024;
+            padding: 12px 14px;
+            font-size: 14px;
+        }
+
+    </style>
+</head>
+<body class="antialiased selection:bg-terracotta selection:text-white">
+
+<!-- Clean, Minimal Sticky Navigation Header -->
+    <header class="sticky top-0 z-40 glass-nav border-b border-stone-200/90 transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-3">
+            <!-- Brand Logo -->
+            <a href="index.html" class="flex items-center gap-2 sm:gap-2.5 group focus:outline-none shrink-0" title="Mộc & Sắc Atelier">
+                <div id="brandLogoMonogram" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slateart text-linen flex items-center justify-center font-bold text-xs shadow-xs group-hover:bg-terracotta transition-colors shrink-0">
+                    M&S
+                </div>
+                <div>
+                    <span id="brandNameDisplay" class="text-sm sm:text-lg font-extrabold tracking-tight text-slateart block leading-tight">
+                        Mộc & Sắc Atelier
+                    </span>
+                    <span id="brandTagline" class="text-[10px] sm:text-[11px] text-stone-500 hidden sm:block mt-0.5">
+                        Mộc mạc trong tâm hồn, rực rỡ trong nghệ thuật
+                    </span>
+                </div>
+            </a>
+
+                        <!-- Streamlined Center Navigation -->
+            <nav class="hidden md:flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-stone-700">
+                <!-- Trang Chủ -->
+                <a href="index.html" class="px-3.5 py-2 rounded-xl transition-colors hover:bg-stone-200/60 text-stone-700">Trang Chủ</a>
+
+                <!-- DROPDOWN 1: BỘ SƯU TẬP -->
+                <div class="relative group py-2">
+                    <a href="catalog.html" class="px-3.5 py-2 rounded-xl transition-colors flex items-center gap-1.5 bg-slateart text-white font-bold" data-i18n="navAll">
+                        <span>Bộ Sưu Tập (35)</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-stone-300 group-hover:rotate-180 transition-transform duration-200"></i>
+                    </a>
+                    <!-- Submenu Dropdown Panel -->
+                    <div class="absolute left-0 top-full pt-1 w-72 sm:w-80 z-50 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 pointer-events-none group-hover:pointer-events-auto">
+                        <div class="bg-white rounded-2xl shadow-2xl border border-stone-200/90 p-2 overflow-hidden ring-1 ring-black/5">
+                            <!-- Dòng 1: Đồ Thêu & Len -->
+                            <a href="catalog.html?tab=handmade" onclick="if(typeof setFilterTab === 'function' && document.getElementById('tab-handmade')) { setFilterTab('handmade'); }" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-linen transition-colors group/item">
+                                <span class="w-10 h-10 rounded-xl bg-blossom/15 text-slateart flex items-center justify-center text-lg shrink-0 group-hover/item:bg-terracotta group-hover/item:text-white transition-colors shadow-2xs">
+                                    🧶
+                                </span>
+                                <div>
+                                    <div class="font-extrabold text-sm text-slateart group-hover/item:text-terracotta transition-colors flex items-center gap-1.5">
+                                        <span>Đồ Thêu & Đan Len</span>
+                                        <span class="px-1.5 py-0.2 rounded-md bg-stone-100 text-[10px] text-stone-600 font-bold">7 món</span>
+                                    </div>
+                                    <div class="text-[11px] text-stone-500 font-normal mt-0.5 leading-snug">Túi len móc, búp bê vải, nón khâu tay</div>
+                                </div>
+                            </a>
+                            <!-- Dòng 2: Tranh Sơn Dầu -->
+                            <a href="catalog.html?tab=oilpainting" onclick="if(typeof setFilterTab === 'function' && document.getElementById('tab-oilpainting')) { setFilterTab('oilpainting'); }" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-linen transition-colors group/item">
+                                <span class="w-10 h-10 rounded-xl bg-ochre/20 text-slateart flex items-center justify-center text-lg shrink-0 group-hover/item:bg-slateart group-hover/item:text-white transition-colors shadow-2xs">
+                                    🎨
+                                </span>
+                                <div>
+                                    <div class="font-extrabold text-sm text-slateart group-hover/item:text-terracotta transition-colors flex items-center gap-1.5">
+                                        <span>Tranh Sơn Dầu 1/1</span>
+                                        <span class="px-1.5 py-0.2 rounded-md bg-stone-100 text-[10px] text-stone-600 font-bold">28 bức</span>
+                                    </div>
+                                    <div class="text-[11px] text-stone-500 font-normal mt-0.5 leading-snug">Đắp nổi Impasto, kèm chứng nhận COA</div>
+                                </div>
+                            </a>
+                            <div class="mt-1 pt-2 border-t border-stone-100">
+                                <a href="catalog.html" class="flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-bold text-stone-600 hover:text-terracotta hover:bg-stone-50 transition-colors">
+                                    <span>Xem tất cả sản phẩm (35)</span>
+                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DROPDOWN 2: ĐẶT LÀM RIÊNG -->
+                <div class="relative group py-2">
+                    <a href="custom-order.html" class="px-3.5 py-2 rounded-xl transition-colors flex items-center gap-1.5 hover:bg-stone-200/60 text-stone-700" data-i18n="navCustom">
+                        <span>Đặt Làm Riêng</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-stone-400 group-hover:text-slateart group-hover:rotate-180 transition-transform duration-200"></i>
+                    </a>
+                    <!-- Submenu Dropdown Panel -->
+                    <div class="absolute left-0 top-full pt-1 w-72 sm:w-80 z-50 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 pointer-events-none group-hover:pointer-events-auto">
+                        <div class="bg-white rounded-2xl shadow-2xl border border-stone-200/90 p-2 overflow-hidden ring-1 ring-black/5">
+                            <!-- Dòng 1: Đặt Đồ Thêu & Len -->
+                            <a href="custom-order.html?type=handmade" onclick="if(document.getElementById('custService')) { document.getElementById('custService').value = 'crochet_bag'; document.getElementById('customOrderForm').scrollIntoView({behavior: 'smooth'}); }" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-linen transition-colors group/item">
+                                <span class="w-10 h-10 rounded-xl bg-blossom/15 text-slateart flex items-center justify-center text-lg shrink-0 group-hover/item:bg-terracotta group-hover/item:text-white transition-colors shadow-2xs">
+                                    🧶
+                                </span>
+                                <div>
+                                    <div class="font-extrabold text-sm text-slateart group-hover/item:text-terracotta transition-colors">Đặt Đồ Thêu & Len</div>
+                                    <div class="text-[11px] text-stone-500 font-normal mt-0.5 leading-snug">Khâu theo ảnh mèo cưng, móc phối màu riêng</div>
+                                </div>
+                            </a>
+                            <!-- Dòng 2: Đặt Tranh Sơn Dầu -->
+                            <a href="custom-order.html?type=oil" onclick="if(document.getElementById('custService')) { document.getElementById('custService').value = 'oil_consult'; document.getElementById('customOrderForm').scrollIntoView({behavior: 'smooth'}); }" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-linen transition-colors group/item">
+                                <span class="w-10 h-10 rounded-xl bg-ochre/20 text-slateart flex items-center justify-center text-lg shrink-0 group-hover/item:bg-slateart group-hover/item:text-white transition-colors shadow-2xs">
+                                    🎨
+                                </span>
+                                <div>
+                                    <div class="font-extrabold text-sm text-slateart group-hover/item:text-terracotta transition-colors">Đặt Tranh Sơn Dầu 1/1</div>
+                                    <div class="text-[11px] text-stone-500 font-normal mt-0.5 leading-snug">Sáng tác theo phòng khách, phong thủy & sofa</div>
+                                </div>
+                            </a>
+                            <div class="mt-1 pt-2 border-t border-stone-100">
+                                <a href="custom-order.html" class="flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-bold text-stone-600 hover:text-terracotta hover:bg-stone-50 transition-colors">
+                                    <span>Quy trình 4 bước đặt làm riêng</span>
+                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Right Utilities: Upload Photo, Language, Currency, Cart -->
+            <div class="flex items-center gap-1.5 sm:gap-2">
+
+                <!-- Language Switcher VI / EN -->
+                <div class="inline-flex items-center bg-rawcanvas p-0.5 rounded-lg border border-stone-300" role="group">
+                    <button id="langViBtn" onclick="setLanguage('vi')" class="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[11px] sm:text-xs font-bold transition-all bg-slateart text-white">
+                        VI
+                    </button>
+                    <button id="langEnBtn" onclick="setLanguage('en')" class="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[11px] sm:text-xs font-bold transition-all text-stone-600 hover:text-slateart">
+                        EN
+                    </button>
+                </div>
+
+                <!-- Cart Button -->
+                <button onclick="toggleCartDrawer(true)" class="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slateart hover:bg-terracotta text-white text-xs font-bold transition-all shadow-xs">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span class="hidden sm:inline" data-i18n="cartBtnText">Giỏ hàng</span>
+                    <span id="cartCountBadge" class="px-1.5 py-0.5 text-[10px] sm:text-[11px] rounded-full bg-ochre text-slateart font-extrabold leading-none">0</span>
+                </button>
+
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="md:hidden w-8 h-8 rounded-xl bg-white border border-stone-300 text-slateart flex items-center justify-center text-xs hover:bg-linen transition-colors" title="Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown Navigation Menu -->
+        <div id="mobileNavMenu" class="hidden md:hidden border-t border-stone-200 bg-white/95 backdrop-blur-md px-3.5 py-3 space-y-2.5 shadow-lg">
+            <div class="grid grid-cols-2 gap-2">
+                <a href="index.html" class="flex items-center gap-2 p-2 rounded-xl text-xs font-bold bg-linen text-slateart">
+                    <i class="fa-solid fa-house text-stone-500"></i>
+                    <span>Trang Chủ</span>
+                </a>
+                <a href="catalog.html" class="flex items-center gap-2 p-2 rounded-xl text-xs font-bold bg-linen text-slateart">
+                    <i class="fa-solid fa-border-all text-stone-500"></i>
+                    <span>Tất Cả (35)</span>
+                </a>
+                <a href="catalog.html?tab=handmade" class="flex items-center gap-2 p-2 rounded-xl text-xs font-bold bg-linen text-slateart">
+                    <span>🧶</span>
+                    <span>Đồ Len (7)</span>
+                </a>
+                <a href="catalog.html?tab=oilpainting" class="flex items-center gap-2 p-2 rounded-xl text-xs font-bold bg-linen text-slateart">
+                    <span>🎨</span>
+                    <span>Sơn Dầu (28)</span>
+                </a>
+                <button onclick="toggleMobileMenu(); openHandmadeCustomizer('HM-BAG-SAKURA-04')" class="flex items-center gap-2 p-2 rounded-xl text-xs font-bold bg-blossom/10 text-slateart text-left">
+                    <i class="fa-solid fa-sliders text-blossom"></i>
+                    <span>Phối Màu 3D</span>
+                </button>
+                <button onclick="toggleMobileMenu(); openRoomPreviewModal('NAG-GTNL-6080')" class="flex items-center gap-2 p-2 rounded-xl text-xs font-bold bg-ochre/15 text-slateart text-left">
+                    <i class="fa-solid fa-couch text-amber-700"></i>
+                    <span>Thử Tường 3D</span>
+                </button>
+                <a href="custom-order.html" class="col-span-2 flex items-center justify-between p-2.5 rounded-xl text-xs font-bold bg-slateart text-white shadow-xs">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-ochre"></i>
+                        <span>Đặt Làm Riêng Theo Yêu Cầu</span>
+                    </span>
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb & Catalog Banner -->
+    <section class="pt-4 sm:pt-8 pb-3 sm:pb-4 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="flex items-center gap-2 text-xs font-semibold text-stone-500 mb-2.5 sm:mb-4">
+            <a href="index.html" class="hover:text-slateart transition-colors flex items-center gap-1.5">
+                <i class="fa-solid fa-house text-stone-400"></i> Trang chủ
+            </a>
+            <i class="fa-solid fa-chevron-right text-[10px] text-stone-400"></i>
+            <span class="text-terracotta font-bold">Bộ Sưu Tập Toàn Bộ (35 Tác Phẩm)</span>
+        </nav>
+
+        <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-10 border border-stone-200/90 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
+            <div class="space-y-1.5 sm:space-y-2 max-w-2xl">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-ochre/20 text-ochre text-[10px] sm:text-xs font-bold border border-ochre/30">
+                    <i class="fa-solid fa-certificate"></i> Danh Mục Chính Thức 2026
+                </span>
+                <h1 class="text-xl sm:text-4xl font-extrabold text-slateart tracking-tight">
+                    Tất Cả Tác Phẩm Mộc & Sắc
+                </h1>
+                <p class="text-stone-600 text-xs sm:text-sm leading-relaxed">
+                    Mỗi sản phẩm là một câu chuyện độc bản 1/1: Từ túi len, búp bê vải đan tay tỉ mỉ đến những bức tranh sơn dầu đắp nổi Impasto mang trường năng lượng chữa lành, bình an và thịnh vượng.
+                </p>
+            </div>
+            <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3 w-full md:w-auto shrink-0">
+                <button onclick="openRoomPreviewModal('NAG-GTNL-6080')" class="px-2.5 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl bg-ochre/25 hover:bg-ochre/40 text-slateart border border-ochre font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all">
+                    <i class="fa-solid fa-couch text-amber-800"></i> Ướm Thử Tranh
+                </button>
+                <button onclick="openHandmadeCustomizer('HM-BAG-SAKURA-04')" class="px-2.5 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl bg-blossom/20 hover:bg-blossom/35 text-slateart border border-blossom font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all">
+                    <i class="fa-solid fa-wand-magic-sparkles text-blossom"></i> Phối Màu Đồ Len
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Clean Catalog Section -->
+    <section id="catalog-section" class="py-4 sm:py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Clean Filter & Search Toolbar -->
+        <div class="bg-white p-3 sm:p-5 rounded-2xl sm:rounded-3xl border border-stone-200/90 shadow-2xs mb-5 sm:mb-8 space-y-3 sm:space-y-4">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
+                <!-- Category Pills (2 Clean Tabs: Đồ Thêu & Len vs Tranh Sơn Dầu) -->
+                <div class="grid grid-cols-2 sm:inline-flex p-1 bg-linen rounded-xl sm:rounded-2xl border border-stone-200/90 gap-1 sm:gap-1.5 shrink-0">
+                    <button onclick="setFilterTab('handmade')" id="tab-handmade" class="filter-tab px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold transition-all bg-slateart text-white shadow-xs text-center flex items-center justify-center gap-1 sm:gap-1.5">
+                        <span>🧶</span> <span data-i18n="tabHandmade">Đồ Thêu & Len (7)</span>
+                    </button>
+                    <button onclick="setFilterTab('oilpainting')" id="tab-oilpainting" class="filter-tab px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold transition-all bg-transparent text-stone-700 hover:bg-white/80 text-center flex items-center justify-center gap-1 sm:gap-1.5">
+                        <span>🎨</span> <span data-i18n="tabOilPainting">Tranh Sơn Dầu (28)</span>
+                    </button>
+                </div>
+
+                <!-- Search & Format Filter -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:flex items-center gap-2 sm:gap-2.5">
+                    <div class="relative w-full sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-xs"></i>
+                        <input id="searchInput" oninput="renderProducts()" type="text" placeholder="Tìm túi len, mèo cam, tranh..." class="w-full pl-8 pr-3 py-2 rounded-xl bg-linen border border-stone-300 text-xs sm:text-sm focus:outline-none focus:border-slateart">
+                    </div>
+
+                    <select id="specFilter" onchange="renderProducts()" class="w-full sm:w-auto px-3 py-2 rounded-xl bg-linen border border-stone-300 text-xs sm:text-sm font-semibold text-stone-700 focus:outline-none focus:border-slateart">
+                        <option value="all" data-i18n="filterSpecAll">✨ Mọi kiểu dáng</option>
+                        <option value="framed" data-i18n="filterSpecFramed">🖼️ Tranh Có Khung</option>
+                        <option value="raw" data-i18n="filterSpecRaw">🎨 Tranh Bản Mộc (Không khung)</option>
+                        <option value="bag" data-i18n="filterSpecBag">👜 Túi & Nón Len Móc</option>
+                        <option value="doll" data-i18n="filterSpecDoll">🧸 Búp Bê & Ví Mèo Khâu Tay</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Grid (2 columns on mobile, 3 columns on desktop) -->
+        <div id="productGrid" class="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6 lg:gap-8">
+            <!-- Dynamically populated by JS -->
+        </div>
+    </section>
+
+    <!-- Bespoke Commission Callout -->
+    <section class="py-8 sm:py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-gradient-to-br from-stone-900 via-slateart to-stone-900 rounded-2xl sm:rounded-3xl p-5 sm:p-12 text-white border border-stone-700 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
+            <div class="space-y-2 sm:space-y-3 max-w-2xl">
+                <span class="inline-flex px-2.5 py-0.5 rounded-full bg-ochre/20 text-ochre text-[10px] sm:text-xs font-bold">
+                    ✨ ĐẶT LÀM RIÊNG THEO YÊU CẦU
+                </span>
+                <h3 class="text-xl sm:text-3xl font-extrabold">
+                    Cần Một Tác Phẩm Mang Dấu Ấn Riêng Của Bạn?
+                </h3>
+                <p class="text-stone-300 text-xs sm:text-sm leading-relaxed">
+                    Tụi mình nhận khâu ví mèo theo ảnh thú cưng thật, đan túi len màu phong thủy, hoặc sáng tác tranh sơn dầu theo kích thước tường phòng khách.
+                </p>
+            </div>
+            <a href="custom-order.html" class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl bg-terracotta hover:bg-amber-600 text-white font-bold text-xs sm:text-sm shrink-0 shadow-lg transition-all flex items-center justify-center gap-2">
+                <span>Gửi Yêu Cầu May Đo</span>
+                <i class="fa-solid fa-arrow-right text-xs"></i>
+            </a>
+        </div>
+    </section>
+
+<!-- Minimal Footer -->
+    <!-- ================================================================= -->
+<!-- LUXURY ATELIER FOOTER: MỘC & SẮC                                  -->
+<!-- ================================================================= -->
+<footer class="bg-[#181614] text-stone-300 pt-8 sm:pt-14 pb-8 sm:pb-10 border-t border-stone-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Main 4-Column Directory Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-12 gap-5 sm:gap-10 pb-8 sm:pb-12 border-b border-stone-800/80">
+            
+            <!-- Col 1 (Brand Story): spans 2 cols on mobile, 4 cols on lg -->
+            <div class="col-span-2 lg:col-span-4 space-y-3 sm:space-y-4">
+                <div class="flex items-center gap-2.5 sm:gap-3">
+                    <div id="footerLogoMonogram" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-ochre text-slateart flex items-center justify-center font-extrabold text-sm shadow-md shrink-0">
+                        M&S
+                    </div>
+                    <div>
+                        <span id="footerBrandName" class="text-base sm:text-lg font-extrabold text-white block tracking-tight">
+                            Mộc & Sắc Atelier
+                        </span>
+                        <span class="text-[11px] sm:text-xs text-stone-400 block" data-i18n="footerAbout">
+                            Đồ Thêu Len Handmade & Tranh Sơn Dầu Độc Bản 1/1
+                        </span>
+                    </div>
+                </div>
+
+                <p class="text-xs sm:text-sm text-stone-400 leading-relaxed font-serif italic pt-0.5">
+                    "Rustic in soul, vibrant in art — Mộc mạc trong tâm hồn, rực rỡ trong nghệ thuật."
+                </p>
+
+                <p class="text-xs text-stone-400 leading-relaxed">
+                    Xưởng sáng tác thủ công chuyên biệt kết hợp giữa nghệ thuật sợi len dệt thô mộc tự nhiên và những nhát cọ sơn dầu đắp nổi Impasto đầy cảm xúc. Mỗi tác phẩm là một câu chuyện độc nhất.
+                </p>
+
+                <div class="pt-1 flex flex-wrap items-center gap-2 text-xs">
+                    <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-stone-900 border border-stone-800 text-stone-300 flex items-center gap-1.5 font-medium text-[11px] sm:text-xs">
+                        <i class="fa-solid fa-certificate text-ochre text-[10px] sm:text-[11px]"></i> COA 1/1 Signed
+                    </span>
+                    <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-stone-900 border border-stone-800 text-stone-300 flex items-center gap-1.5 font-medium text-[11px] sm:text-xs">
+                        <i class="fa-solid fa-hands text-terracotta text-[10px] sm:text-[11px]"></i> 100% Khâu & Vẽ Tay
+                    </span>
+                </div>
+
+                <!-- Social Icons -->
+                <div class="pt-1 flex items-center gap-2.5 sm:gap-3">
+                    <a href="https://instagram.com" target="_blank" rel="noopener" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-stone-800/80 hover:bg-terracotta hover:text-white text-stone-400 flex items-center justify-center text-xs sm:text-sm transition-all" title="Instagram">
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+                    <a href="https://facebook.com" target="_blank" rel="noopener" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-stone-800/80 hover:bg-terracotta hover:text-white text-stone-400 flex items-center justify-center text-xs sm:text-sm transition-all" title="Facebook">
+                        <i class="fa-brands fa-facebook-f"></i>
+                    </a>
+                    <a href="https://tiktok.com" target="_blank" rel="noopener" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-stone-800/80 hover:bg-terracotta hover:text-white text-stone-400 flex items-center justify-center text-xs sm:text-sm transition-all" title="TikTok">
+                        <i class="fa-brands fa-tiktok"></i>
+                    </a>
+                    <a href="https://zalo.me/09098882026" target="_blank" rel="noopener" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-stone-800/80 hover:bg-ochre hover:text-slateart text-stone-400 flex items-center justify-center text-[11px] sm:text-xs font-bold transition-all" title="Zalo Official">
+                        Zalo
+                    </a>
+                </div>
+            </div>
+
+            <!-- Col 2 (Collection): 1 col on mobile, 3 cols on lg -->
+            <div class="col-span-1 lg:col-span-3 space-y-2 sm:space-y-3">
+                <div class="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-ochre">
+                    Bộ Sưu Tập
+                </div>
+                <ul class="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-stone-400">
+                    <li>
+                        <a href="catalog.html?tab=handmade" class="hover:text-white transition-colors flex items-center gap-1.5">
+                            <span class="text-blossom text-xs">🧶</span>
+                            <span class="font-medium">Đồ Thêu & Len (7)</span>
+                        </a>
+                    </li>
+                    <li class="pl-4 text-[11px] sm:text-xs text-stone-500">
+                        • Túi len hoa nổi
+                    </li>
+                    <li class="pl-4 text-[11px] sm:text-xs text-stone-500">
+                        • Búp bê vải linen
+                    </li>
+                    <li class="pl-4 text-[11px] sm:text-xs text-stone-500">
+                        • Ví mèo khâu tay
+                    </li>
+                    <li class="pt-1">
+                        <a href="catalog.html?tab=oilpainting" class="hover:text-white transition-colors flex items-center gap-1.5">
+                            <span class="text-ochre text-xs">🎨</span>
+                            <span class="font-medium">Tranh Sơn Dầu (28)</span>
+                        </a>
+                    </li>
+                    <li class="pl-4 text-[11px] sm:text-xs text-stone-500">
+                        • Tranh Chữa Lành
+                    </li>
+                    <li class="pl-4 text-[11px] sm:text-xs text-stone-500">
+                        • Tranh Bình An
+                    </li>
+                    <li class="pl-4 text-[11px] sm:text-xs text-stone-500">
+                        • Tranh Thịnh Vượng
+                    </li>
+                    <li class="pt-1">
+                        <a href="catalog.html" class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-terracotta hover:text-white transition-colors">
+                            <span>Tất cả (35 món)</span>
+                            <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Col 3 (Services): 1 col on mobile, 2 cols on lg -->
+            <div class="col-span-1 lg:col-span-2 space-y-2 sm:space-y-3">
+                <div class="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-ochre">
+                    Dịch Vụ Atelier
+                </div>
+                <ul class="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-stone-400">
+                    <li>
+                        <a href="custom-order.html?type=handmade" class="hover:text-white transition-colors flex items-center gap-1.5">
+                            <i class="fa-solid fa-paw text-[10px] text-terracotta"></i>
+                            <span>Ví thú cưng</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="custom-order.html?type=oil" class="hover:text-white transition-colors flex items-center gap-1.5">
+                            <i class="fa-solid fa-palette text-[10px] text-ochre"></i>
+                            <span>Tranh phong thủy</span>
+                        </a>
+                    </li>
+                    <li>
+                        <button type="button" onclick="openHandmadeCustomizer('HM-BAG-SAKURA-04')" class="hover:text-white transition-colors flex items-center gap-1.5 text-left text-xs sm:text-sm text-stone-400">
+                            <i class="fa-solid fa-wand-magic-sparkles text-[10px] text-blossom"></i>
+                            <span>Phối màu 3D</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" onclick="openRoomPreviewModal('NAG-GTNL-6080')" class="hover:text-white transition-colors flex items-center gap-1.5 text-left text-xs sm:text-sm text-stone-400">
+                            <i class="fa-solid fa-couch text-[10px] text-amber-500"></i>
+                            <span>Ướm tranh 3D</span>
+                        </button>
+                    </li>
+                    <li>
+                        <a href="custom-order.html" class="hover:text-white transition-colors flex items-center gap-1.5">
+                            <i class="fa-solid fa-gift text-[10px] text-terracotta"></i>
+                            <span>Quà tặng tân gia</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="custom-order.html" class="hover:text-white transition-colors flex items-center gap-1.5">
+                            <i class="fa-solid fa-scroll text-[10px] text-ochre"></i>
+                            <span>Chứng nhận COA</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Col 4 (Contact): spans 2 cols on mobile, 3 cols on lg -->
+            <div class="col-span-2 lg:col-span-3 space-y-2.5 sm:space-y-3 pt-3 sm:pt-0 border-t border-stone-800/80 lg:border-t-0">
+                <div class="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-ochre">
+                    Xưởng & Liên Hệ
+                </div>
+                <div class="space-y-2 text-xs sm:text-sm text-stone-400">
+                    <div class="flex items-start gap-2">
+                        <i class="fa-solid fa-location-dot text-terracotta text-xs mt-0.5 shrink-0"></i>
+                        <span>Thảo Điền, TP. Thủ Đức, TP. Hồ Chí Minh (Hẹn trước)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-phone text-ochre text-xs shrink-0"></i>
+                        <span class="text-[11px] text-stone-400">Hotline:</span>
+                        <a href="tel:09098882026" class="font-extrabold text-white hover:text-ochre transition-colors text-xs sm:text-sm">
+                            0909 888 2026
+                        </a>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-envelope text-stone-400 text-xs shrink-0"></i>
+                        <a href="mailto:atelier@mocvasac.vn" class="hover:text-white transition-colors text-[11px] sm:text-xs font-mono">
+                            atelier@mocvasac.vn
+                        </a>
+                    </div>
+                    <div class="pt-1.5 text-[11px] text-stone-500 border-t border-stone-800/80 leading-relaxed">
+                        🚚 <strong>Giao hàng:</strong> Hỏa tốc 2H tại TP.HCM & HN • Kiện gỗ chống sốc toàn quốc & quốc tế.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bottom Bar: Copyright & Payment Security -->
+        <div class="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-stone-500">
+            <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
+                <span>© 2026 <strong>Mộc & Sắc Atelier</strong>. All rights reserved.</span>
+                <span class="hidden sm:inline">•</span>
+                <span class="text-stone-400 italic font-serif">Mỗi tác phẩm là độc bản duy nhất — Không sản xuất hàng loạt.</span>
+            </div>
+            <div class="flex items-center gap-3 text-stone-400 text-xs">
+                <span class="flex items-center gap-1"><i class="fa-solid fa-qrcode text-ochre"></i> VietQR</span>
+                <span>•</span>
+                <span class="flex items-center gap-1"><i class="fa-solid fa-truck-fast text-terracotta"></i> COD</span>
+                <span>•</span>
+                <span class="flex items-center gap-1"><i class="fa-solid fa-credit-card text-stone-300"></i> Visa/Master</span>
+                <span>•</span>
+                <span class="flex items-center gap-1"><i class="fa-brands fa-paypal text-sky-400"></i> PayPal</span>
+            </div>
+        </div>
+
+    </div>
+</footer>
+
+
+
+    <!-- ================================================================= -->
+    <!-- MODAL 1 (XL SIZE): PRODUCT DETAIL & COA 1/1 INSPECTOR             -->
+    <!-- ================================================================= -->
+    <div id="productModal" onclick="if(event.target === this) closeProductModal()" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-2 sm:p-5 overflow-y-auto cursor-pointer">
+        <div onclick="event.stopPropagation()" class="cursor-default bg-linen w-full max-w-6xl rounded-2xl sm:rounded-3xl border border-stone-300 shadow-2xl overflow-hidden my-auto max-h-[95vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="px-4 py-3 sm:px-6 sm:py-4 bg-white border-b border-stone-200 flex items-center justify-between">
+                <div class="flex items-center gap-2 sm:gap-2.5">
+                    <span id="modalCodeBadge" class="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-lg bg-slateart text-ochre font-mono text-xs sm:text-sm font-bold">NAG-001</span>
+                    <span id="modalEditionBadge" class="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-lg bg-terracotta/15 text-terracotta text-xs sm:text-sm font-bold">Độc Bản 1/1</span>
+                </div>
+                <button onclick="closeProductModal()" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-rawcanvas hover:bg-stone-300 flex items-center justify-center text-slateart text-base sm:text-lg transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (Larger Image + Clearer Layout) -->
+            <div class="p-3.5 sm:p-10 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-10 items-center">
+                <!-- Left Large Image (7 cols) -->
+                <div class="lg:col-span-7">
+                    <div class="relative rounded-xl sm:rounded-2xl overflow-hidden bg-slateart border border-stone-300 aspect-square sm:aspect-[5/4] shadow-lg">
+                        <img id="modalProductImg" src="" alt="Product" class="w-full h-full object-contain bg-stone-900">
+                        <div class="absolute bottom-2 left-2 right-2 sm:bottom-4 sm:left-4 sm:right-4 p-2 sm:p-3 rounded-lg sm:rounded-xl bg-black/75 backdrop-blur-xs text-white text-[11px] sm:text-sm flex items-center justify-between">
+                            <span id="modalTextureCaption" class="truncate mr-2"><i class="fa-solid fa-sparkles text-ochre mr-1"></i> Tác phẩm thủ công 100%</span>
+                            <label class="cursor-pointer px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-lg bg-ochre text-slateart font-bold text-xs hover:bg-amber-400 transition-colors shrink-0">
+                                <i class="fa-solid fa-upload mr-1"></i><span data-i18n="replaceImgShort">Thay ảnh</span>
+                                <input type="file" accept="image/*" class="hidden" onchange="uploadSingleProductPhoto(event)">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Product Details (5 cols) -->
+                <div class="lg:col-span-5 space-y-3 sm:space-y-5">
+                    <div id="modalPillarLabel" class="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-terracotta">
+                        TRỤ CỘT 01: NĂNG LƯỢNG CHỮA LÀNH
+                    </div>
+                    <h3 id="modalTitle" class="text-xl sm:text-4xl font-extrabold text-slateart leading-tight">
+                        Tên tác phẩm
+                    </h3>
+                    <div id="modalPrice" class="text-xl sm:text-3xl font-extrabold text-terracotta">
+                        12.500.000 ₫
+                    </div>
+
+                    <!-- Story Description -->
+                    <p id="modalDesc" class="text-stone-700 text-xs sm:text-base leading-relaxed line-clamp-3 sm:line-clamp-none">
+                        Mô tả chi tiết tác phẩm...
+                    </p>
+
+                    <!-- Clean Specs Box -->
+                    <div class="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-stone-200 space-y-2 text-xs sm:text-sm">
+                        <div class="flex justify-between gap-2">
+                            <span class="text-stone-500" data-i18n="specSize">Kích thước:</span>
+                            <strong id="modalDimensions" class="text-slateart text-right">60cm x 80cm</strong>
+                        </div>
+                        <div class="flex justify-between gap-2 border-t border-stone-100 pt-1.5 sm:pt-2">
+                            <span class="text-stone-500" data-i18n="specMaterial">Chất liệu:</span>
+                            <strong id="modalMaterial" class="text-slateart text-right truncate ml-2">Sơn dầu trên vải Canvas</strong>
+                        </div>
+                        <div class="flex justify-between gap-2 border-t border-stone-100 pt-1.5 sm:pt-2">
+                            <span class="text-stone-500" data-i18n="specSpace">Phù hợp:</span>
+                            <strong id="modalPlacement" class="text-slateart text-right truncate ml-2">Phòng khách, Penthouse</strong>
+                        </div>
+                    </div>
+
+                    <!-- Certificate Note -->
+                    <div class="p-2.5 sm:p-3.5 rounded-xl bg-rawcanvas text-xs sm:text-sm text-stone-700 flex items-center gap-2.5">
+                        <i class="fa-solid fa-shield-halved text-terracotta text-base sm:text-lg shrink-0"></i>
+                        <div id="modalCoaNote" class="line-clamp-2 sm:line-clamp-none text-[11px] sm:text-sm">Cam kết độc bản 1/1 kèm giấy chứng nhận chữ ký họa sĩ.</div>
+                    </div>
+
+                    <!-- Large Action Buttons -->
+                    <div class="pt-1 grid grid-cols-2 gap-2 sm:gap-3">
+                        <button id="modalRoomPreviewBtn" class="py-2.5 sm:py-4 px-2 sm:px-5 rounded-xl sm:rounded-2xl bg-ochre/25 hover:bg-ochre/40 text-slateart border border-ochre font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all text-center">
+                            <i class="fa-solid fa-couch text-amber-800 text-xs sm:text-sm"></i>
+                            <span data-i18n="tryInRoomBtn">Ướm Thử Tường</span>
+                        </button>
+                        <button id="modalCraftCustomBtn" class="py-2.5 sm:py-4 px-2 sm:px-5 rounded-xl sm:rounded-2xl bg-blossom/20 hover:bg-blossom/35 text-slateart border border-blossom font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all text-center">
+                            <i class="fa-solid fa-sliders text-blossom text-xs sm:text-sm"></i>
+                            <span data-i18n="customizeCraftBtn">Phối Màu Size</span>
+                        </button>
+                        <button id="modalAddToCartBtn" class="py-2.5 sm:py-4 px-3 sm:px-6 rounded-xl sm:rounded-2xl bg-slateart hover:bg-terracotta text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-lg transition-all text-center">
+                            <i class="fa-solid fa-bag-shopping text-xs sm:text-sm"></i>
+                            <span data-i18n="addToCartBtn">Thêm Vào Giỏ</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL 2 (XXL SIZE): VIRTUAL ROOM WALL PREVIEWER & 5PM LIGHT       -->
+    <!-- ================================================================= -->
+    <div id="roomPreviewModal" onclick="if(event.target === this) closeRoomPreviewModal()" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto cursor-pointer">
+        <div onclick="event.stopPropagation()" class="cursor-default bg-slateart text-linen w-full max-w-7xl rounded-2xl sm:rounded-3xl border border-stone-700 shadow-2xl overflow-hidden my-auto">
+            <!-- Header -->
+            <div class="px-4 py-3 sm:px-6 sm:py-4 bg-black/40 border-b border-stone-700 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 sm:gap-2.5">
+                    <i class="fa-solid fa-couch text-ochre text-base sm:text-lg"></i>
+                    <h3 class="text-sm sm:text-2xl font-extrabold text-white truncate" data-i18n="roomModalTitle">
+                        Phòng Thử Tranh Ảo — Xem Trước Tranh Trên Tường Nhà Bạn
+                    </h3>
+                </div>
+                <button onclick="closeRoomPreviewModal()" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-base sm:text-lg shrink-0">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12">
+                <!-- Extra Large Wall Stage (8 cols) -->
+                <div id="roomWallStage" class="lg:col-span-8 relative min-h-[250px] sm:min-h-[580px] flex flex-col items-center justify-center p-4 sm:p-8 transition-all duration-500 overflow-hidden" style="background: linear-gradient(180deg, #E8E2D5 0%, #D5CBB8 78%, #8C7A65 78%, #6E5D4B 100%);">
+                    <div id="sunlightOverlay" class="absolute inset-0 pointer-events-none transition-opacity duration-500 opacity-60" style="background: linear-gradient(125deg, rgba(255,165,60,0.38) 0%, rgba(255,120,40,0.12) 55%, rgba(20,20,30,0.35) 100%); mix-blend-mode: overlay;"></div>
+
+                    <!-- Framed Painting on Wall (Larger Preview) -->
+                    <div class="relative z-10 flex flex-col items-center mb-8 sm:mb-14">
+                        <div id="roomFrameContainer" class="frame-classic transition-all duration-300">
+                            <img id="roomPreviewImg" src="" alt="Painting on wall" class="max-h-[160px] sm:max-h-[340px] w-auto object-contain block transition-all duration-300">
+                        </div>
+                        <div class="mt-2.5 sm:mt-4 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-black/75 text-white text-[11px] sm:text-sm font-semibold backdrop-blur-xs shadow-lg">
+                            <span id="roomPaintingCaption">NAG-GTNL-6080 • 60cm x 80cm</span>
+                        </div>
+                    </div>
+
+                    <!-- Sofa Silhouette Scale Reference -->
+                    <div class="absolute bottom-2 sm:bottom-3 w-4/5 max-w-lg h-12 sm:h-16 rounded-t-2xl bg-stone-800/90 border-t-2 sm:border-t-4 border-stone-600 shadow-2xl flex items-center justify-center text-[10px] sm:text-xs text-stone-300 font-semibold tracking-wider uppercase">
+                        <span data-i18n="sofaScaleLabel">Sofa Tiêu Chuẩn Dài 2.0m</span>
+                    </div>
+                </div>
+
+                <!-- Controls Sidebar (4 cols) -->
+                <div class="lg:col-span-4 p-4 sm:p-8 space-y-4 sm:space-y-6 bg-stone-900 border-t lg:border-t-0 lg:border-l border-stone-700 flex flex-col justify-between">
+                    <div class="space-y-3.5 sm:space-y-5">
+                        <!-- Select Painting -->
+                        <div>
+                            <label class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-ochre mb-1.5 sm:mb-2" data-i18n="roomSelectPainting">1. Chọn Tranh Muốn Thử</label>
+                            <select id="roomPaintingSelect" onchange="changeRoomPainting(this.value)" class="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 rounded-xl bg-stone-800 border border-stone-600 text-xs sm:text-sm text-white font-semibold focus:outline-none">
+                            </select>
+                        </div>
+
+                        <!-- Lighting Simulator -->
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] sm:text-xs font-bold uppercase tracking-wider text-ochre mb-1.5 sm:mb-2">
+                                <span data-i18n="roomLightLabel">2. Ánh Sáng Trong Phòng</span>
+                                <span id="lightTimeBadge" class="text-amber-400">Hoàng hôn 5PM</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="setRoomLight('morning')" class="py-2 px-1.5 sm:py-2.5 sm:px-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-[11px] sm:text-xs border border-stone-600 text-center">
+                                    ☀️ <span class="block mt-0.5 font-semibold" data-i18n="lightMorning">Ban ngày</span>
+                                </button>
+                                <button onclick="setRoomLight('sunset')" class="py-2 px-1.5 sm:py-2.5 sm:px-2 rounded-xl bg-amber-500/20 border border-amber-400 text-amber-300 text-[11px] sm:text-xs font-bold text-center">
+                                    🌇 <span class="block mt-0.5" data-i18n="lightSunset">Nắng 5h</span>
+                                </button>
+                                <button onclick="setRoomLight('gallery')" class="py-2 px-1.5 sm:py-2.5 sm:px-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-[11px] sm:text-xs border border-stone-600 text-center">
+                                    💡 <span class="block mt-0.5 font-semibold" data-i18n="lightGallery">Đèn Rọi</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Wall Color -->
+                        <div>
+                            <label class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-ochre mb-1.5 sm:mb-2" data-i18n="roomSpacePreset">3. Màu Tường Nhà Bạn</label>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <button onclick="setRoomWallBg('penthouse')" class="p-2 sm:p-3 rounded-xl bg-stone-800 hover:bg-stone-700 border border-stone-600 text-left font-bold text-white text-[11px] sm:text-xs">
+                                    ✨ Kem Sáng Hiện Đại
+                                </button>
+                                <button onclick="setRoomWallBg('slate')" class="p-2 sm:p-3 rounded-xl bg-stone-800 hover:bg-stone-700 border border-stone-600 text-left font-bold text-white text-[11px] sm:text-xs">
+                                    🖤 Xám Đen Sang Trọng
+                                </button>
+                                <button onclick="setRoomWallBg('zen')" class="p-2 sm:p-3 rounded-xl bg-stone-800 hover:bg-stone-700 border border-stone-600 text-left font-bold text-white text-[11px] sm:text-xs">
+                                    🍵 Be Mộc Phòng Trà
+                                </button>
+                                <button onclick="setRoomWallBg('indochine')" class="p-2 sm:p-3 rounded-xl bg-stone-800 hover:bg-stone-700 border border-stone-600 text-left font-bold text-white text-[11px] sm:text-xs">
+                                    🪵 Vàng Gỗ Indochine
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Frame Style Toggle -->
+                        <div>
+                            <label class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-ochre mb-1.5 sm:mb-2" data-i18n="roomFrameStyle">4. Kiểu Khung Tranh</label>
+                            <div class="grid grid-cols-3 gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-semibold">
+                                <button onclick="setRoomFrame('classic')" class="py-2 px-1 sm:py-2.5 sm:px-2 rounded-xl bg-stone-800 hover:bg-stone-700 border border-stone-600">Khung Cổ Điển</button>
+                                <button onclick="setRoomFrame('modern')" class="py-2 px-1 sm:py-2.5 sm:px-2 rounded-xl bg-stone-800 hover:bg-stone-700 border border-stone-600">Khung Hiện Đại</button>
+                                <button onclick="setRoomFrame('raw')" class="py-2 px-1 sm:py-2.5 sm:px-2 rounded-xl bg-stone-800 hover:bg-stone-700 border border-stone-600">Không Khung</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="addCurrentRoomPaintingToCart()" class="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl bg-terracotta hover:bg-ochre hover:text-slateart text-white font-extrabold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-lg">
+                        <i class="fa-solid fa-cart-plus"></i>
+                        <span data-i18n="roomAddCartBtn">Chốt Bức Tranh Này</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL 3 (LARGE): PHOTO UPLOADER FOR STORE OWNER                   -->
+    <!-- ================================================================= -->
+    <div id="photoManagerModal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-linen w-full max-w-4xl rounded-3xl border border-stone-300 shadow-2xl overflow-hidden my-auto">
+            <div class="px-6 py-4 bg-white border-b border-stone-200 flex items-center justify-between">
+                <h3 class="text-xl sm:text-2xl font-extrabold text-slateart">
+                    <i class="fa-solid fa-images text-terracotta mr-2"></i>
+                    <span data-i18n="photoModalTitle">Thay Ảnh Thật Từ Máy Tính / Điện Thoại</span>
+                </h3>
+                <button onclick="closePhotoManagerModal()" class="w-10 h-10 rounded-full bg-rawcanvas flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+                <p class="text-sm text-stone-600" data-i18n="photoModalDesc">
+                    Bấm nút "Chọn ảnh" bên cạnh sản phẩm bất kỳ để tải ảnh chụp thật từ máy của bạn lên website:
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5" id="photoManagerList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL 4 (XXL SIZE): HANDMADE 3D STUDIO CUSTOMIZER                 -->
+    <!-- ================================================================= -->
+    <div id="handmadeCustomizerModal" onclick="if(event.target === this) closeHandmadeCustomizer()" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto cursor-pointer">
+        <div onclick="event.stopPropagation()" class="bg-linen text-slateart w-full max-w-7xl rounded-3xl border border-stone-300 shadow-2xl overflow-hidden my-auto cursor-default">
+            <!-- Header -->
+            <div class="px-6 py-4 bg-slateart text-white border-b border-stone-700 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-blossom/20 text-blossom flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </span>
+                    <div>
+                        <h3 class="text-base sm:text-2xl font-extrabold leading-tight truncate" data-i18n="craftModalTitle">
+                            Xưởng Tự Phối Màu & Thiết Kế Đồ Len Handmade
+                        </h3>
+                    </div>
+                </div>
+                <button onclick="closeHandmadeCustomizer()" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-base sm:text-lg shrink-0">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12">
+                <!-- Left Extra-Large Live Preview Canvas (7 cols) -->
+                <div id="craftStageBg" class="lg:col-span-7 relative min-h-[270px] sm:min-h-[580px] flex flex-col items-center justify-center p-3 sm:p-8 transition-all duration-300 bg-rawcanvas">
+                    <div class="absolute top-2.5 left-2.5 right-2.5 sm:top-4 sm:left-4 sm:right-4 flex flex-wrap items-center justify-between gap-2 z-10">
+                        <span id="craftLiveBadge" class="px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white/95 border border-stone-300 text-[10px] sm:text-xs font-bold text-slateart shadow-xs">
+                            🧶 Xem Trước Bản Phối
+                        </span>
+                        <div class="flex items-center gap-1.5 sm:gap-2 bg-white/95 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-stone-300 text-[11px] sm:text-xs font-semibold">
+                            <span class="text-stone-500" data-i18n="craftBgLabel">Nền:</span>
+                            <button onclick="setCraftStageBg('#EAE6DF')" class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#EAE6DF] border border-stone-400"></button>
+                            <button onclick="setCraftStageBg('#5D3A24')" class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#5D3A24] border border-stone-400"></button>
+                            <button onclick="setCraftStageBg('#D9B8EC')" class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#D9B8EC] border border-stone-400"></button>
+                            <button onclick="setCraftStageBg('#23262A')" class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#23262A] border border-stone-400"></button>
+                        </div>
+                    </div>
+
+                    <!-- Larger Canvas & Scale Reference -->
+                    <div class="relative flex items-end justify-center gap-4 sm:gap-6 my-4 sm:my-8">
+                        <div id="craftCanvasWrapper" class="transition-transform duration-300 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border-2 sm:border-4 border-white bg-white">
+                            <canvas id="craftCustomCanvas" width="380" height="440" class="w-[220px] sm:w-[340px] h-auto block"></canvas>
+                        </div>
+
+                        <!-- Phone Scale Reference -->
+                        <div class="hidden sm:flex flex-col items-center text-center bg-white/90 p-3 rounded-2xl border border-stone-300 shadow-md">
+                            <div class="w-11 h-24 rounded-xl border-2 border-slateart bg-stone-800 flex flex-col items-center justify-between p-1.5 text-[9px] text-white font-mono">
+                                <span class="w-4 h-0.5 bg-stone-500 rounded"></span>
+                                <span>iPhone<br>15cm</span>
+                                <span class="w-2 h-2 rounded-full border border-stone-400"></span>
+                            </div>
+                            <span class="text-[11px] font-bold text-slateart mt-2" data-i18n="phoneScaleLabel">So sánh kích cỡ</span>
+                            <span id="craftSizeDimensionTag" class="text-[11px] text-terracotta font-bold">Size M (30x25cm)</span>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Summary Bar -->
+                    <div class="w-full max-w-lg bg-white px-3.5 py-2.5 sm:px-5 sm:py-3.5 rounded-xl sm:rounded-2xl border border-stone-300 shadow-md flex items-center justify-between text-xs sm:text-sm">
+                        <div class="truncate pr-2 sm:pr-3">
+                            <span class="font-extrabold text-slateart text-xs sm:text-sm" id="craftSummaryTitle">Túi Xách Len Đen Thêu Nổi</span>
+                            <span class="block text-[11px] sm:text-xs text-stone-500 truncate mt-0.5" id="craftSummarySpecs">Màu: Đen Tuyền • Họa tiết: Hoa Đào 3D • Size M</span>
+                        </div>
+                        <div id="craftSummaryPrice" class="text-sm sm:text-xl font-extrabold text-terracotta shrink-0">
+                            1.450.000 ₫
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Controls (5 cols) -->
+                <div class="lg:col-span-5 p-4 sm:p-8 bg-white border-t lg:border-t-0 lg:border-l border-stone-200 space-y-4 sm:space-y-5 flex flex-col justify-between">
+                    <div class="space-y-3.5 sm:space-y-5">
+                        <!-- 1. Base Template -->
+                        <div class="relative z-30">
+                            <label class="block text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-slateart mb-1.5 sm:mb-2" data-i18n="craftStep1">
+                                1. Chọn Mẫu Đồ Len Bạn Thích
+                            </label>
+                            <select id="craftBaseSelect" onchange="onCraftBaseChange(this.value)" class="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 rounded-xl bg-linen border border-stone-300 text-xs sm:text-sm font-bold text-slateart focus:outline-none focus:border-terracotta">
+                                <option value="HM-BAG-SAKURA-04" selected>Túi Xách Len Đen Thêu Nổi Nhành Hoa Đào</option>
+                                <option value="HM-DOLL-ROSE-01">Búp Bê Vải Linen Tóc Len Hồng Đính Hoa Hồng</option>
+                                <option value="HM-BAG-OCEAN-02">Túi Len Móc Đại Dương Hồng Ombre San Hô</option>
+                                <option value="HM-BAG-SUNFLOWER-03">Túi Len Móc Hoa Hướng Dương Rực Rỡ Nền Nâu</option>
+                                <option value="HM-BAG-FUCHSIA-05">Túi Len Đan Ô Cờ Hồng Cánh Sen Đính Nơ</option>
+                                <option value="HM-POUCH-CAT-06">Ví Vải Khâu Tay Mèo Cam Bụng Bự</option>
+                                <option value="HM-POUCH-CALICO-07">Túi Đeo Chéo Vải Linen Khâu Tay Mèo Tam Thể</option>
+                            </select>
+                        </div>
+
+                        <!-- 2. Yarn Color -->
+                        <div>
+                            <div class="flex items-center justify-between text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-slateart mb-1.5 sm:mb-2">
+                                <span data-i18n="craftStep2">2. Đổi Màu Sợi Len / Vải</span>
+                                <span id="craftColorNameLabel" class="text-terracotta font-bold normal-case">Đen Tuyền</span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2 sm:gap-2.5" id="craftColorSwatches"></div>
+                        </div>
+
+                        <!-- 3. 3D Motif or Custom Photo -->
+                        <div>
+                            <label class="block text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-slateart mb-1.5 sm:mb-2" data-i18n="craftStep3">
+                                3. Chọn Họa Tiết Đính Nổi Hoặc Tải Ảnh Lên
+                            </label>
+                            <div class="grid grid-cols-2 gap-2 text-xs" id="craftMotifButtons">
+                                <button type="button" onclick="setCraftMotif('sakura')" id="motif-sakura" class="motif-btn px-2.5 py-2 rounded-xl border border-stone-300 bg-linen font-semibold text-left flex items-center gap-1.5 text-xs">
+                                    🌸 <span>Hoa Đào 3D</span>
+                                </button>
+                                <button type="button" onclick="setCraftMotif('sunflower')" id="motif-sunflower" class="motif-btn px-2.5 py-2 rounded-xl border border-stone-300 bg-linen font-semibold text-left flex items-center gap-1.5 text-xs">
+                                    🌻 <span>Hướng Dương</span>
+                                </button>
+                                <button type="button" onclick="setCraftMotif('ocean')" id="motif-ocean" class="motif-btn px-2.5 py-2 rounded-xl border border-stone-300 bg-linen font-semibold text-left flex items-center gap-1.5 text-xs">
+                                    🪼 <span>Sứa & Sao</span>
+                                </button>
+                                <button type="button" onclick="setCraftMotif('cat')" id="motif-cat" class="motif-btn px-2.5 py-2 rounded-xl border border-stone-300 bg-linen font-semibold text-left flex items-center gap-1.5 text-xs">
+                                    🐱 <span>Mèo Cam Cưng</span>
+                                </button>
+                                <button type="button" onclick="setCraftMotif('bow')" id="motif-bow" class="motif-btn px-2.5 py-2 rounded-xl border border-stone-300 bg-linen font-semibold text-left flex items-center gap-1.5 text-xs">
+                                    🎀 <span>Nơ Bản To</span>
+                                </button>
+                                <label class="px-2.5 py-2 rounded-xl border-2 border-dashed border-terracotta bg-terracotta/10 hover:bg-terracotta/20 text-terracotta font-bold cursor-pointer flex items-center gap-1.5 text-xs transition-colors">
+                                    <i class="fa-solid fa-camera"></i>
+                                    <span data-i18n="uploadCustomMotifBtn">Tải ảnh thú cưng</span>
+                                    <input type="file" accept="image/*" class="hidden" onchange="uploadCraftCustomImage(event)">
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 4. Size & Custom Embroidered Name -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                            <div>
+                                <label class="block text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-slateart mb-1.5 sm:mb-2" data-i18n="craftStep4Size">
+                                    4. Chọn Kích Cỡ
+                                </label>
+                                <div class="grid grid-cols-3 gap-1.5 sm:gap-2 text-xs">
+                                    <button type="button" onclick="setCraftSize('S')" id="sizeBtn-S" class="py-2 sm:py-2.5 rounded-xl border border-stone-300 bg-linen font-bold">
+                                        S <span class="block text-[9px] sm:text-[10px] font-normal text-stone-500">(-15%)</span>
+                                    </button>
+                                    <button type="button" onclick="setCraftSize('M')" id="sizeBtn-M" class="py-2 sm:py-2.5 rounded-xl border-2 border-slateart bg-slateart text-white font-bold">
+                                        M <span class="block text-[9px] sm:text-[10px] font-normal text-ochre">Vừa</span>
+                                    </button>
+                                    <button type="button" onclick="setCraftSize('L')" id="sizeBtn-L" class="py-2 sm:py-2.5 rounded-xl border border-stone-300 bg-linen font-bold">
+                                        L <span class="block text-[9px] sm:text-[10px] font-normal text-stone-500">(+20%)</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-slateart mb-1.5 sm:mb-2" data-i18n="craftStep4Name">
+                                    5. Thêu Tên Lên Túi
+                                </label>
+                                <input type="text" id="craftCustomTextInput" oninput="onCraftTextChange(this.value)" maxlength="18" placeholder="Nhập tên muốn thêu..." class="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 rounded-xl bg-linen border border-stone-300 text-xs sm:text-sm font-semibold focus:outline-none focus:border-slateart">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="addCustomizedHandmadeToCart()" class="w-full py-3 sm:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl bg-terracotta hover:bg-slateart text-white font-extrabold text-xs sm:text-sm shadow-lg transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-cart-plus"></i>
+                        <span data-i18n="craftAddToCartBtn">Chốt Mẫu Phối Này & Thêm Vào Giỏ</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- SLIDE-OVER SHOPPING CART & BILINGUAL CHECKOUT DRAWER              -->
+    <!-- ================================================================= -->
+    <div id="cartDrawerBackdrop" onclick="toggleCartDrawer(false)" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs transition-opacity"></div>
+    <aside id="cartDrawer" class="fixed top-0 right-0 z-50 h-full w-full max-w-md bg-linen shadow-2xl border-l border-stone-300 transform translate-x-full transition-transform duration-300 flex flex-col">
+        <!-- Drawer Header -->
+        <div class="px-4 py-3 sm:px-6 sm:py-4 bg-white border-b border-stone-200 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-bag-shopping text-terracotta"></i>
+                <h3 class="font-editorial text-lg sm:text-2xl font-bold text-slateart" data-i18n="cartDrawerTitle">Giỏ Hàng Của Bạn</h3>
+            </div>
+            <button onclick="toggleCartDrawer(false)" class="w-8 h-8 rounded-full bg-rawcanvas hover:bg-stone-300 flex items-center justify-center text-slateart">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Cart Items List -->
+        <div id="cartItemsContainer" class="flex-1 p-3.5 sm:p-6 overflow-y-auto space-y-3 sm:space-y-4">
+            <!-- Populated by JS -->
+        </div>
+
+        <!-- Checkout Form & Summary Footer -->
+        <div class="p-3.5 sm:p-6 bg-white border-t border-stone-200 space-y-3 sm:space-y-4">
+            <div class="flex items-center justify-between text-xs sm:text-base font-bold text-slateart">
+                <span data-i18n="cartTotalLabel">Tổng cộng (Freeship):</span>
+                <span id="cartTotalPrice" class="text-base sm:text-xl text-terracotta">0 ₫</span>
+            </div>
+
+            <!-- Quick Checkout Inputs -->
+            <div id="checkoutFields" class="space-y-2 pt-2 border-t border-stone-200 hidden">
+                <input id="orderName" type="text" placeholder="Họ tên người nhận / Full Name *" class="w-full px-3 py-2 rounded-lg bg-linen border border-stone-300 text-xs sm:text-sm">
+                <input id="orderPhone" type="text" placeholder="Số điện thoại / Phone / WhatsApp *" class="w-full px-3 py-2 rounded-lg bg-linen border border-stone-300 text-xs sm:text-sm">
+                <input id="orderAddress" type="text" placeholder="Địa chỉ giao hàng / Shipping Address *" class="w-full px-3 py-2 rounded-lg bg-linen border border-stone-300 text-xs sm:text-sm">
+                <select id="orderPayment" class="w-full px-3 py-2 rounded-lg bg-linen border border-stone-300 text-xs sm:text-sm">
+                    <option value="bank">⚡ Chuyển khoản VietQR / Bank Transfer (Kèm COA 1/1)</option>
+                    <option value="cod">📦 Thanh toán khi nhận hàng (COD Việt Nam)</option>
+                    <option value="intl">🌐 International Card / PayPal (Worldwide Express)</option>
+                </select>
+            </div>
+
+            <button id="checkoutActionBtn" onclick="handleCheckoutStep()" class="w-full py-3 sm:py-3.5 rounded-xl bg-slateart hover:bg-terracotta text-white font-bold text-xs sm:text-sm transition-all shadow-md flex items-center justify-center gap-2">
+                <i class="fa-solid fa-check-circle"></i>
+                <span id="checkoutBtnText" data-i18n="proceedCheckoutBtn">Tiến Hành Đặt Hàng</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Custom Toast Notification -->
+    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 hidden max-w-sm bg-slateart text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-ochre/50 flex items-center gap-3 transition-all">
+        <i class="fa-solid fa-circle-check text-ochre text-lg"></i>
+        <div id="toastMessage" class="text-xs sm:text-sm font-medium">Đã thêm sản phẩm vào giỏ hàng!</div>
+    </div>
+
+    
+
+    <!-- Modular Scripts -->
+    <script src="js/products-data.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Check URL params for active tab on catalog page
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab');
+            if (tab === 'oilpainting' || tab === 'handmade') {
+                setFilterTab(tab);
+            } else {
+                renderProducts();
+            }
+        });
+    </script>
+</body>
+</html>
