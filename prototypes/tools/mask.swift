@@ -9,6 +9,11 @@ import ImageIO
 import UniformTypeIdentifiers
 
 let a = CommandLine.arguments
+guard a.count >= 3 else { fputs("usage: mask <photo.jpg> <out-mask.png> [json]\n", stderr); exit(2) }
+guard let src = CGImageSourceCreateWithURL(URL(fileURLWithPath: a[1]) as CFURL, nil),
+      CGImageSourceGetCount(src) > 0 else {
+  fputs("mask: cannot read image \(a[1])\n", stderr); exit(1)
+}
 let handler = VNImageRequestHandler(url: URL(fileURLWithPath: a[1]))
 let req = VNGenerateForegroundInstanceMaskRequest()
 try handler.perform([req])

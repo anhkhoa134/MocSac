@@ -2,7 +2,10 @@
 # Regenerates prototypes/masks/*.png (bag cut-out masks used by accessory-composer.html).
 # Needs macOS 14+ with Xcode command line tools: the foreground mask comes from Apple's
 # on-device Vision framework (VNGenerateForegroundInstanceMaskRequest) — nothing is uploaded.
-# Run from the repo root:  sh prototypes/tools/make-masks.sh
+# Run from anywhere:  sh prototypes/tools/make-masks.sh
+# Photos are read from img/products/ (untracked in git). In a git worktree that has no copy,
+# the main checkout's img/products/ is used; or point at them explicitly:
+#   IMG=/path/to/img/products sh prototypes/tools/make-masks.sh
 #
 # Vision returns everything in the foreground (the hand holding LEN-01, the flower basket next
 # to LEN-13), so each product can pass a JSON spec with normalised (0–1) polygons:
@@ -11,9 +14,26 @@
 # Tip: open the composer, tick "Hiện điểm gắn" and click the photo to read coordinates.
 set -e
 cd "$(dirname "$0")/../.."
+
+if [ -z "$IMG" ]; then
+  IMG=img/products
+  if [ ! -d "$IMG" ]; then
+    # git worktree: fall back to the main checkout (parent of the shared .git dir)
+    MAIN="$(cd "$(git rev-parse --git-common-dir 2>/dev/null)/.." 2>/dev/null && pwd)"
+    [ -n "$MAIN" ] && [ -d "$MAIN/img/products" ] && IMG="$MAIN/img/products"
+  fi
+fi
+for f in len-01-tui-no-be.jpg len-13-tui-tim-no-hong.jpg len-19-tui-tote-xanh-trang.jpg; do
+  if [ ! -s "$IMG/$f" ]; then
+    echo "make-masks: cannot find $IMG/$f" >&2
+    echo "  img/products/ is not in git; run from a checkout that has it, or set IMG=/path/to/img/products" >&2
+    exit 1
+  fi
+done
+echo "photos: $IMG"
+
 BIN="${TMPDIR:-/tmp}/mocsac-mask"
 swiftc -O prototypes/tools/mask.swift -o "$BIN"
-IMG=img/products
 OUT=prototypes/masks
 mkdir -p "$OUT"
 
