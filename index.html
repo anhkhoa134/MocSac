@@ -1167,11 +1167,21 @@
                             </div>
                         </div>
 
-                        <!-- 4. Size & Custom Embroidered Name -->
+                        <!-- 4. Accessories -->
+                        <div>
+                            <label class="block text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-slateart mb-1.5 sm:mb-2" data-i18n="craftStep4Acc">
+                                4. Thêm Phụ Kiện (Tuỳ Chọn)
+                            </label>
+                            <div id="craftAccessoryTray" class="grid grid-cols-3 sm:grid-cols-5 gap-1.5 sm:gap-2"></div>
+                            <div id="craftAccessoryPlaced" class="hidden flex flex-wrap gap-1.5 mt-2"></div>
+                            <p id="craftAccessoryNote" class="mt-2 text-[10px] sm:text-[11px] text-slateart/70"></p>
+                        </div>
+
+                        <!-- 5. Size & Custom Embroidered Name -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div>
                                 <label class="block text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-slateart mb-1.5 sm:mb-2" data-i18n="craftStep4Size">
-                                    4. Chọn Kích Cỡ
+                                    5. Chọn Kích Cỡ
                                 </label>
                                 <div class="grid grid-cols-3 gap-1.5 sm:gap-2 text-xs">
                                     <button type="button" onclick="setCraftSize('S')" id="sizeBtn-S" class="py-2 sm:py-2.5 rounded-xl border border-stone-300 bg-linen font-bold">
@@ -1188,7 +1198,7 @@
 
                             <div>
                                 <label class="block text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-slateart mb-1.5 sm:mb-2" data-i18n="craftStep4Name">
-                                    5. Thêu Tên Lên Túi
+                                    6. Thêu Tên Lên Túi
                                 </label>
                                 <input type="text" id="craftCustomTextInput" oninput="onCraftTextChange(this.value)" maxlength="18" placeholder="Nhập tên muốn thêu..." class="w-full px-3 py-2.5 sm:px-3.5 sm:py-3 rounded-xl bg-linen border border-stone-300 text-xs sm:text-sm font-semibold focus:outline-none focus:border-slateart">
                             </div>
