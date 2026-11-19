@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="90" height="160" viewBox="0 0 90 160">
+  <!-- Hanging charm: split ring (pivot at top centre) + cord + yarn pompom. Placeholder art. -->
+  <defs>
+    <linearGradient id="silver" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F4F4F4"/><stop offset=".5" stop-color="#A9ADB3"/><stop offset="1" stop-color="#6C7178"/>
+    </linearGradient>
+    <radialGradient id="pom" cx=".4" cy=".35" r=".75">
+      <stop offset="0" stop-color="#FFF6E4"/><stop offset=".6" stop-color="#EEDCC2"/><stop offset="1" stop-color="#C9AE86"/>
+    </radialGradient>
+  </defs>
+  <circle cx="45" cy="14" r="10" fill="none" stroke="url(#silver)" stroke-width="4"/>
+  <path d="M45 24 C43 34 47 42 45 52" fill="none" stroke="#B2533E" stroke-width="4" stroke-linecap="round"/>
+  <path d="M45 24 C47 34 43 42 45 52" fill="none" stroke="#D97B60" stroke-width="2" stroke-linecap="round"/>
+  <rect x="38" y="50" width="14" height="10" rx="3" fill="#B2533E"/>
+  <g stroke-linecap="round">
+    <circle cx="45" cy="105" r="42" fill="url(#pom)"/>
+    <g stroke="#C9AE86" stroke-width="2.2" fill="none" opacity=".9">
+      <path d="M45 63v8M60 66l-3 7M73 76l-6 5M84 92l-8 2M86 108h-8M82 124l-7-3M72 138l-5-6M58 146l-2-8M45 148v-8M31 146l2-8M18 138l5-6M8 124l7-3M4 108h8M6 92l8 2M17 76l6 5M30 66l3 7"/>
+    </g>
+    <g stroke="#fff" stroke-width="2" fill="none" opacity=".75">
+      <path d="M32 82l4 6M44 78l0 7M28 98l6 2M38 94l4 5M52 88l-2 6M24 112l7-1"/>
+    </g>
+    <g stroke="#A88B62" stroke-width="1.6" fill="none" opacity=".6">
+      <path d="M60 112l5 6M50 126l2 7M66 98l6-1M38 130l-3 6M58 132l3 6M70 120l6 3"/>
+    </g>
+  </g>
+</svg>

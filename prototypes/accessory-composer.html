@@ -1,0 +1,852 @@
+<!doctype html>
+<!--
+================================================================================
+ Mộc & Sắc — Accessory composer prototype (2.5D on real product photos)
+================================================================================
+ Shoppers drag accessories (hanging charms, pins, bows) from the tray onto a real
+ product photo. Accessories snap only to compatible anchors on that product.
+
+ RUN
+   From the repo root (the folder that contains img/products/):
+     python3 -m http.server 8000
+   then open http://localhost:8000/prototypes/accessory-composer.html
+   (Opening the file directly via file:// works for dragging, but PNG export is
+   blocked by the browser's canvas security rules.)
+
+ CONFIG — everything lives in the <script type="application/json" id="composer-config">
+ block below. Coordinates are NORMALISED: x and y are fractions (0–1) of the
+ product photo's width and height, origin = top-left of the photo.
+
+   {
+     "accessories": [
+       {
+         "id":    "charm-heart",                      // stable id, used in saved designs
+         "name":  "Charm tim",                        // label in the tray
+         "type":  "hang" | "surface",                 // which anchor type it snaps to
+         "src":   "accessories/charm-heart.svg",      // PNG or SVG, transparent background
+         "width": 0.09,                               // on-photo width at scale 1, as a fraction of photo width
+         "pivot": [0.5, 0.093]                        // point inside the accessory image (0–1 of its own w/h)
+       }                                              //   hang: the ring the charm hangs from
+     ],                                               //   surface: usually the centre [0.5, 0.5]
+     "products": [
+       {
+         "id":    "LEN-01",
+         "name":  "Túi nơ len màu be",
+         "image": "../img/products/len-01-tui-no-be.jpg",
+         "anchors": [
+           { "id": "handle-left", "label": "Quai trái", "type": "hang",
+             "point": [0.295, 0.13],                  // where the accessory's pivot (ring) attaches
+             "max": 1 },                              // optional capacity, default 1 for hang, unlimited for surface
+           { "id": "front", "label": "Mặt trước", "type": "surface",
+             "polygon": [[0.36,0.47], [0.64,0.47], ...] }   // accessory centre may sit anywhere inside
+         ]
+       }
+     ]
+   }
+
+   hang    — point anchor (handle ring, strap loop). Hanging charms snap to it,
+             hang below it and swing like a small pendulum. Charms are always
+             drawn in front of the bag body and of surface items.
+   surface — polygon anchor (front panel). Pins/stickers/bows snap anywhere
+             inside; dragging is clamped to the union of the product's surface
+             polygons. A dropped item outside but near a polygon is pulled to
+             its nearest edge.
+
+ INTERACTION
+   Drag from the tray (mouse, pen or touch) or tap a tray item to auto-place it on
+   the first free compatible anchor. Anchor hints appear while dragging. Select a
+   placed item to move it, resize/rotate it (corner + rotate handles on desktop;
+   −/+/⟲/⟳ toolbar on every device, the only way on touch screens) or delete it
+   (Xóa button or Delete/Backspace). Charms sway while carried and swing on drop.
+
+ TIP for authoring anchors: tick "Hiện điểm gắn" and click the photo — the
+ normalised [x, y] of the click is shown under the stage and logged to the
+ console, ready to paste into the JSON.
+
+ SAVED DESIGN ("Lưu thiết kế") — logged to the console and shown in the textarea:
+   { "version": 1, "productId": "LEN-01",
+     "accessories": [ { "accessoryId": "charm-heart", "anchorId": "handle-left",
+                        "x": 0.295, "y": 0.13,        // normalised position of the accessory's pivot
+                        "scale": 1, "rotation": 0 } ] } // rotation in degrees (user rotation, not the swing)
+ "Nạp JSON" restores a design from the textarea. "Tải PNG" exports the composed
+ photo at the photo's native resolution (anchor hints and handles hidden).
+================================================================================
+-->
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phối phụ kiện – prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F6F2EA; --card: #FAF7F2; --ink: #1E2024; --muted: #6B645B; --line: #E8E2D5;
+    --accent: #B2533E; --accent-soft: #F3E1DA; --gold: #D49B35;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); }
+  body { font-family: 'Be Vietnam Pro', system-ui, sans-serif; font-size: 15px; line-height: 1.45; padding: 16px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 14px; font-size: 13px; }
+  .layout { display: grid; grid-template-columns: minmax(0, 560px) minmax(260px, 340px); grid-template-rows: auto 1fr;
+            grid-template-areas: "stage tray" "stage out"; gap: 16px 20px; align-items: start; max-width: 940px; }
+  .stage-card { grid-area: stage; } .tray-panel { grid-area: tray; } .out-panel { grid-area: out; }
+  @media (max-width: 760px) {
+    body { padding: 12px 16px; }
+    h1 { font-size: 18px; }
+    .layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: "stage" "tray" "out"; gap: 12px; }
+    /* keep the tray reachable while the photo is on screen */
+    .tray-panel { position: sticky; bottom: 0; z-index: 5; padding: 8px 10px; box-shadow: 0 -6px 18px rgba(30, 32, 36, .12); }
+    .tray-panel h2, .tray-help, .tray-item .tp { display: none; }
+    .tray-item img { height: 40px; width: 40px; }
+  }
+
+  .stage-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 10px; }
+  .product-pick { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .product-pick select { flex: 1; min-width: 0; font: inherit; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: #fff; }
+  #stage { position: relative; width: 100%; border-radius: 12px; overflow: hidden; background: #EAE6DF; }
+  #stage .msg { padding: 40px 16px; text-align: center; color: var(--muted); font-size: 14px; }
+
+  .toolbar { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+  .toolbar button { min-width: 44px; height: 40px; }
+  .toolbar .sel-label { font-size: 13px; color: var(--muted); margin-right: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1 1 100%; }
+  .status { min-height: 20px; font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .opts { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .opts label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+
+  button { font: inherit; font-size: 14px; border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 10px; padding: 0 12px; height: 40px; cursor: pointer; }
+  button:hover:not(:disabled) { border-color: var(--accent); }
+  button:disabled { opacity: .45; cursor: default; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  button.danger { color: var(--accent); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+  .panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; margin: 0 0 8px; color: var(--muted); }
+  .tray { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  @media (max-width: 760px) { .tray { grid-template-columns: repeat(4, 1fr); } }
+  .tray-item { height: auto; padding: 8px 4px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+               touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; cursor: grab; }
+  .tray-item img { height: 54px; width: 54px; object-fit: contain; pointer-events: none; }
+  .tray-item .nm { font-size: 12px; font-weight: 600; text-align: center; line-height: 1.2; }
+  .tray-item .tp { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .tray-item.dragging { opacity: .4; }
+  .tray-help { font-size: 12px; color: var(--muted); margin: 8px 0 0; }
+
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .actions button { flex: 1 1 auto; }
+  textarea { width: 100%; height: 150px; margin-top: 10px; font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; border: 1px solid var(--line); border-radius: 10px; padding: 8px; background: #fff; resize: vertical; }
+  .png-out { margin-top: 10px; display: none; }
+  .png-out img { width: 100%; border-radius: 10px; border: 1px solid var(--line); }
+  .png-out a { font-size: 13px; color: var(--accent); }
+
+  #ghost { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 50; display: none; transform-origin: 0 0;
+           filter: drop-shadow(2px 5px 4px rgba(42, 26, 16, .35)); transition: opacity .1s; }
+  #ghost.invalid { opacity: .45; filter: grayscale(.6); }
+</style>
+</head>
+<body>
+<h1>Phối phụ kiện cho túi len</h1>
+<p class="sub">Prototype 2.5D trên ảnh thật · kéo charm treo vào quai túi, ghim/nơ vào mặt trước.</p>
+
+<div class="layout">
+  <section class="stage-card">
+    <div class="product-pick">
+      <select id="productSelect" aria-label="Chọn sản phẩm"></select>
+    </div>
+    <div id="stage"></div>
+    <div class="toolbar" id="toolbar">
+      <span class="sel-label" id="selLabel">Chạm vào phụ kiện để chỉnh</span>
+      <button id="btnSmaller" title="Nhỏ lại" aria-label="Nhỏ lại">−</button>
+      <button id="btnBigger" title="To lên" aria-label="To lên">+</button>
+      <button id="btnRotL" title="Xoay trái 15°" aria-label="Xoay trái">⟲</button>
+      <button id="btnRotR" title="Xoay phải 15°" aria-label="Xoay phải">⟳</button>
+      <button id="btnDelete" class="danger" title="Xóa (Delete)">Xóa</button>
+    </div>
+    <div class="status" id="status" aria-live="polite"></div>
+    <div class="opts">
+      <label><input type="checkbox" id="optHints"> Hiện điểm gắn</label>
+    </div>
+  </section>
+
+  <aside class="panel tray-panel">
+    <h2>Phụ kiện</h2>
+    <div class="tray" id="tray"></div>
+    <p class="tray-help">Kéo thả vào ảnh, hoặc chạm để tự gắn vào chỗ trống.</p>
+  </aside>
+
+  <aside class="panel out-panel">
+    <h2>Thiết kế</h2>
+    <div class="actions">
+      <button class="primary" id="btnSave">Lưu thiết kế</button>
+      <button id="btnPng">Tải PNG</button>
+    </div>
+    <div class="actions" style="margin-top:8px">
+      <button id="btnLoad">Nạp JSON</button>
+      <button id="btnClear" class="danger">Xóa hết</button>
+    </div>
+    <textarea id="jsonOut" spellcheck="false" placeholder="JSON thiết kế sẽ hiện ở đây…" aria-label="JSON thiết kế"></textarea>
+    <div class="png-out" id="pngOut"><img id="pngImg" alt="Ảnh xuất PNG"><a id="pngLink" download="moc-sac-thiet-ke.png">Tải lại file PNG</a></div>
+  </aside>
+</div>
+
+<img id="ghost" alt="">
+
+<script type="application/json" id="composer-config">
+{
+  "accessories": [
+    { "id": "charm-heart",  "name": "Charm tim",     "type": "hang",    "src": "accessories/charm-heart.svg",  "width": 0.085, "pivot": [0.5, 0.093] },
+    { "id": "charm-pompom", "name": "Pompom len",    "type": "hang",    "src": "accessories/charm-pompom.svg", "width": 0.095, "pivot": [0.5, 0.088] },
+    { "id": "pin-daisy",    "name": "Huy hiệu cúc",  "type": "surface", "src": "accessories/pin-daisy.svg",    "width": 0.10,  "pivot": [0.5, 0.5] },
+    { "id": "bow-ribbon",   "name": "Nơ satin",      "type": "surface", "src": "accessories/bow-ribbon.svg",   "width": 0.14,  "pivot": [0.5, 0.5] }
+  ],
+  "products": [
+    {
+      "id": "LEN-01", "name": "LEN-01 · Túi nơ len màu be", "image": "../img/products/len-01-tui-no-be.jpg",
+      "anchors": [
+        { "id": "handle-left",  "label": "Quai trái",  "type": "hang", "point": [0.292, 0.125] },
+        { "id": "handle-right", "label": "Quai phải",  "type": "hang", "point": [0.672, 0.135] },
+        { "id": "bow-knot",     "label": "Nút nơ",     "type": "hang", "point": [0.500, 0.345] },
+        { "id": "front", "label": "Thân trước", "type": "surface",
+          "polygon": [[0.36,0.47],[0.50,0.44],[0.64,0.47],[0.72,0.58],[0.70,0.69],[0.50,0.72],[0.30,0.69],[0.27,0.58]] },
+        { "id": "bow", "label": "Cánh nơ", "type": "surface",
+          "polygon": [[0.14,0.40],[0.20,0.22],[0.30,0.20],[0.42,0.32],[0.58,0.32],[0.72,0.17],[0.80,0.22],[0.86,0.40],[0.86,0.52],[0.62,0.43],[0.38,0.43],[0.14,0.52]] }
+      ]
+    },
+    {
+      "id": "LEN-13", "name": "LEN-13 · Túi tím nơ hồng", "image": "../img/products/len-13-tui-tim-no-hong.jpg",
+      "anchors": [
+        { "id": "handle-left",  "label": "Quai trái", "type": "hang", "point": [0.560, 0.560] },
+        { "id": "handle-right", "label": "Quai phải", "type": "hang", "point": [0.918, 0.560] },
+        { "id": "bow-knot",     "label": "Nút nơ",    "type": "hang", "point": [0.745, 0.455] },
+        { "id": "front", "label": "Thân trước", "type": "surface",
+          "polygon": [[0.54,0.71],[0.95,0.71],[0.97,0.94],[0.53,0.95]] }
+      ]
+    },
+    {
+      "id": "LEN-19", "name": "LEN-19 · Túi tote xanh trắng", "image": "../img/products/len-19-tui-tote-xanh-trang.jpg",
+      "anchors": [
+        { "id": "handle-left",  "label": "Quai trái", "type": "hang", "point": [0.425, 0.270] },
+        { "id": "handle-right", "label": "Quai phải", "type": "hang", "point": [0.660, 0.310] },
+        { "id": "front", "label": "Thân trước", "type": "surface",
+          "polygon": [[0.24,0.42],[0.44,0.34],[0.62,0.36],[0.76,0.46],[0.80,0.62],[0.76,0.80],[0.50,0.82],[0.18,0.76],[0.12,0.62]] }
+      ]
+    }
+  ]
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/konva@9.3.6/konva.min.js"
+        integrity="sha384-dQ8XDs6DrjeqXtf7ueTKk6FhOFXssIr4tYXXTU3YXpO3Bi6Q802fIAvfxC4qbXiN"
+        crossorigin="anonymous"></script>
+<script>
+(() => {
+'use strict';
+
+// ---------------------------------------------------------------------------
+// Config & state
+// ---------------------------------------------------------------------------
+const CONFIG = JSON.parse(document.getElementById('composer-config').textContent);
+const ACC = Object.fromEntries(CONFIG.accessories.map(a => [a.id, a]));
+const IS_TOUCH = matchMedia('(pointer: coarse)').matches;
+const SNAP_RADIUS = IS_TOUCH ? 0.11 : 0.085;      // normalised distance (fraction of photo width)
+const TOUCH_LIFT = IS_TOUCH ? 44 : 0;            // ghost floats above the finger so it stays visible
+const MIN_SCALE = 0.4, MAX_SCALE = 2.6;
+const ACCENT = '#B2533E';
+
+const $ = id => document.getElementById(id);
+const stageEl = $('stage');
+
+let product = null;           // current product config
+let PW = 800, PH = 800;       // product photo natural size = stage logical size
+let viewScale = 1;            // CSS px per photo px
+let items = [];               // placed accessories
+let selected = null;          // selected item
+let uidSeq = 1;
+let showHintsAlways = false;
+const accImages = {};         // accessory id -> HTMLImageElement
+const savedPerProduct = {};   // product id -> design, so switching products keeps work
+
+// Konva scene ---------------------------------------------------------------
+const stage = new Konva.Stage({ container: stageEl, width: 10, height: 10 });
+const photoLayer = new Konva.Layer({ listening: true });
+const surfaceLayer = new Konva.Layer();            // pins/stickers sit on the bag body
+const hangLayer = new Konva.Layer();               // charms always in front of the body
+const overlayLayer = new Konva.Layer();            // anchor hints + transformer
+stage.add(photoLayer, surfaceLayer, hangLayer, overlayLayer);
+const hintGroup = new Konva.Group({ listening: false });
+overlayLayer.add(hintGroup);
+const photoNode = new Konva.Image({ x: 0, y: 0 });
+photoLayer.add(photoNode);
+
+// On touch screens accessories are only ~30 px wide at 375 px, so handles would cover them:
+// there the transformer is just a selection outline and the toolbar buttons do scale/rotate.
+const tr = new Konva.Transformer({
+  keepRatio: true, flipEnabled: false, centeredScaling: false,
+  enabledAnchors: IS_TOUCH ? [] : ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+  rotateEnabled: !IS_TOUCH,
+  anchorSize: 11, anchorCornerRadius: 10, anchorStroke: ACCENT, anchorFill: '#fff',
+  borderStroke: ACCENT, borderStrokeWidth: 1.5, borderDash: [4, 3], rotateAnchorOffset: 24, padding: 4,
+  rotationSnaps: [0, 90, 180, 270], rotationSnapTolerance: 4,
+  boundBoxFunc: (oldBox, newBox) => {
+    const min = 18, max = stage.width() * 0.75;
+    return (Math.abs(newBox.width) < min || Math.abs(newBox.width) > max) ? oldBox : newBox;
+  },
+});
+overlayLayer.add(tr);
+
+// ---------------------------------------------------------------------------
+// Geometry helpers (all in photo pixels unless noted)
+// ---------------------------------------------------------------------------
+const toPx = ([nx, ny]) => ({ x: nx * PW, y: ny * PH });
+const toNorm = p => [p.x / PW, p.y / PH];
+const round4 = v => Math.round(v * 10000) / 10000;
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+function polyPx(anchor) { return anchor.polygon.map(toPx); }
+
+function pointInPoly(p, poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const a = poly[i], b = poly[j];
+    if ((a.y > p.y) !== (b.y > p.y) && p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x) inside = !inside;
+  }
+  return inside;
+}
+
+function closestOnPoly(p, poly) {
+  let best = null, bestD = Infinity;
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], b = poly[(i + 1) % poly.length];
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const t = clamp(((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy || 1), 0, 1);
+    const q = { x: a.x + t * dx, y: a.y + t * dy };
+    const d = dist(p, q);
+    if (d < bestD) { bestD = d; best = q; }
+  }
+  // nudge 1px towards the inside so the result tests as "inside"
+  const c = centroid(poly), d = dist(best, c) || 1;
+  return { point: { x: best.x + (c.x - best.x) / d, y: best.y + (c.y - best.y) / d }, dist: bestD };
+}
+
+function centroid(poly) {
+  const s = poly.reduce((acc, p) => ({ x: acc.x + p.x, y: acc.y + p.y }), { x: 0, y: 0 });
+  return { x: s.x / poly.length, y: s.y / poly.length };
+}
+
+const anchorsOfType = type => product.anchors.filter(a => a.type === type);
+const anchorById = id => product.anchors.find(a => a.id === id);
+
+function anchorCapacity(a) { return a.max ?? (a.type === 'hang' ? 1 : Infinity); }
+function anchorLoad(a, exceptItem) { return items.filter(it => it !== exceptItem && it.anchorId === a.id).length; }
+function anchorFree(a, exceptItem) { return anchorLoad(a, exceptItem) < anchorCapacity(a); }
+
+/**
+ * Where would an accessory of `type` land if dropped with its pivot at `p`?
+ * Returns { anchor, point } or null when the drop is not valid.
+ */
+function findSnap(type, p, exceptItem = null) {
+  const radius = SNAP_RADIUS * PW;
+  if (type === 'hang') {
+    let best = null;
+    for (const a of anchorsOfType('hang')) {
+      if (!anchorFree(a, exceptItem)) continue;
+      const ap = toPx(a.point), d = dist(p, ap);
+      if (d <= radius && (!best || d < best.d)) best = { anchor: a, point: ap, d };
+    }
+    return best;
+  }
+  let near = null;
+  for (const a of anchorsOfType('surface')) {
+    if (!anchorFree(a, exceptItem)) continue;
+    const poly = polyPx(a);
+    if (pointInPoly(p, poly)) return { anchor: a, point: { x: p.x, y: p.y }, d: 0 };
+    const c = closestOnPoly(p, poly);
+    if (c.dist <= radius && (!near || c.dist < near.d)) near = { anchor: a, point: c.point, d: c.dist };
+  }
+  return near;
+}
+
+/** Clamp a surface item's position to the union of surface polygons (used while dragging). */
+function clampToSurface(p, exceptItem) {
+  let best = null;
+  for (const a of anchorsOfType('surface')) {
+    if (!anchorFree(a, exceptItem)) continue;
+    const poly = polyPx(a);
+    if (pointInPoly(p, poly)) return { anchor: a, point: p };
+    const c = closestOnPoly(p, poly);
+    if (!best || c.dist < best.d) best = { anchor: a, point: c.point, d: c.dist };
+  }
+  return best;
+}
+
+// ---------------------------------------------------------------------------
+// Anchor hints
+// ---------------------------------------------------------------------------
+let hintType = null, hintTarget = null;
+
+function drawHints(type, target) {
+  hintType = type; hintTarget = target;
+  hintGroup.destroyChildren();
+  const types = type ? [type] : (showHintsAlways ? ['surface', 'hang'] : []);
+  const px = 1 / viewScale;   // one CSS pixel in photo pixels
+  for (const t of types) {
+    for (const a of anchorsOfType(t)) {
+      const isTarget = target && target.anchor === a;
+      const free = anchorFree(a, dragItem);
+      if (t === 'surface') {
+        hintGroup.add(new Konva.Line({
+          points: polyPx(a).flatMap(p => [p.x, p.y]), closed: true,
+          fill: isTarget ? 'rgba(178,83,62,.22)' : 'rgba(255,255,255,.18)',
+          stroke: isTarget ? ACCENT : '#fff', strokeWidth: 2, dash: [6, 5], strokeScaleEnabled: false,
+          shadowColor: '#000', shadowBlur: 4, shadowOpacity: .35, shadowForStrokeEnabled: true,
+        }));
+      } else {
+        const c = toPx(a.point);
+        hintGroup.add(new Konva.Circle({
+          x: c.x, y: c.y, radius: (isTarget ? 16 : 12) * px,
+          fill: isTarget ? 'rgba(178,83,62,.35)' : 'rgba(255,255,255,.25)',
+          stroke: free ? (isTarget ? ACCENT : '#fff') : '#999', strokeWidth: 2.5, strokeScaleEnabled: false,
+          dash: free ? [5, 4] : [2, 3], shadowColor: '#000', shadowBlur: 4, shadowOpacity: .4,
+        }));
+        hintGroup.add(new Konva.Circle({ x: c.x, y: c.y, radius: 3 * px, fill: free ? ACCENT : '#999' }));
+      }
+    }
+  }
+  overlayLayer.batchDraw();
+}
+const clearHints = () => drawHints(null, null);
+
+// ---------------------------------------------------------------------------
+// Placed items
+// ---------------------------------------------------------------------------
+function createItem({ accessoryId, anchorId, x, y, scale = 1, rotation = 0 }, { swing = true } = {}) {
+  const acc = ACC[accessoryId];
+  const imgEl = accImages[accessoryId];
+  if (!acc || !imgEl) { console.warn('Unknown accessory', accessoryId); return null; }
+  const w = acc.width * PW, h = w * imgEl.naturalHeight / imgEl.naturalWidth;
+  const it = { uid: uidSeq++, acc, anchorId, scale, rotation, th: 0, om: 0, lastX: null, lastVx: 0, len: h * 0.6 };
+
+  it.image = new Konva.Image({
+    image: imgEl, width: w, height: h, offsetX: acc.pivot[0] * w, offsetY: acc.pivot[1] * h,
+    shadowColor: '#2A1A10', shadowBlur: 12, shadowOffset: { x: 3, y: 6 }, shadowOpacity: 0.38,
+  });
+  it.node = new Konva.Group({
+    x: x * PW, y: y * PH, scaleX: scale, scaleY: scale, rotation, draggable: true, name: 'accessory',
+  });
+  it.node.add(it.image);
+  (acc.type === 'hang' ? hangLayer : surfaceLayer).add(it.node);
+  wireItem(it);
+  items.push(it);
+  if (acc.type === 'hang' && swing) kick(it, 1);
+  return it;
+}
+
+function removeItem(it) {
+  if (!it) return;
+  if (selected === it) select(null);
+  it.node.destroy();
+  items = items.filter(i => i !== it);
+  surfaceLayer.batchDraw(); hangLayer.batchDraw();
+  setStatus(`Đã xóa ${it.acc.name}.`);
+}
+
+let dragItem = null, dragStartPos = null;
+
+function wireItem(it) {
+  const n = it.node;
+  n.on('mousedown touchstart', () => select(it));
+  n.on('dragstart', () => {
+    dragItem = it; dragStartPos = n.position();
+    select(it);
+    tr.visible(false);
+    drawHints(it.acc.type, null);
+    if (it.acc.type === 'hang') startSwing();   // sway while being carried
+  });
+  if (it.acc.type === 'surface') {
+    n.dragBoundFunc(abs => {
+      const local = { x: abs.x / viewScale, y: abs.y / viewScale };
+      const r = clampToSurface(local, it);
+      const p = r ? r.point : dragStartPos;
+      return { x: p.x * viewScale, y: p.y * viewScale };
+    });
+  }
+  n.on('dragmove', () => {
+    const snap = findSnap(it.acc.type, n.position(), it);
+    if (snap?.anchor !== hintTarget?.anchor) drawHints(it.acc.type, snap);
+  });
+  n.on('dragend', () => {
+    const snap = findSnap(it.acc.type, n.position(), it);
+    dragItem = null;
+    if (it.acc.type === 'hang') {
+      const target = snap ? snap.point : toPx(anchorById(it.anchorId).point);
+      if (snap) it.anchorId = snap.anchor.id;
+      n.to({ x: target.x, y: target.y, duration: 0.16, easing: Konva.Easings.EaseOut,
+             onFinish: () => { tr.visible(true); tr.forceUpdate(); } });
+      kick(it, n.x() < target.x ? 1 : -1);
+      setStatus(snap ? `Đã treo ${it.acc.name} vào ${snap.anchor.label}.` : `Không có móc treo trống ở đó — trả về ${anchorById(it.anchorId).label}.`);
+    } else {
+      if (snap) { it.anchorId = snap.anchor.id; n.position(snap.point); }
+      tr.visible(true); tr.forceUpdate();
+    }
+    clearHints();
+  });
+  n.on('transform', () => {
+    // keep hanging charms pinned at their ring; keep surface items inside the panel
+    if (it.acc.type === 'hang') n.position(toPx(anchorById(it.anchorId).point));
+    else { const r = clampToSurface(n.position(), it); if (r) n.position(r.point); }
+  });
+  n.on('transformend', () => {
+    const s = clamp(n.scaleX(), MIN_SCALE, MAX_SCALE);
+    n.scale({ x: s, y: s });
+    it.scale = s; it.rotation = n.rotation();
+    tr.forceUpdate();
+  });
+}
+
+function select(it) {
+  selected = it;
+  if (it) { it.node.moveToTop(); tr.nodes([it.node]); tr.visible(true); }
+  else tr.nodes([]);
+  const has = !!it;
+  for (const id of ['btnSmaller', 'btnBigger', 'btnRotL', 'btnRotR', 'btnDelete']) $(id).disabled = !has;
+  $('selLabel').textContent = has ? `${it.acc.name} · ${anchorById(it.anchorId)?.label ?? ''}` : 'Chạm vào phụ kiện để chỉnh';
+  overlayLayer.batchDraw();
+}
+
+function adjustSelected({ scaleBy = 1, rotateBy = 0 }) {
+  const it = selected; if (!it) return;
+  const s = clamp(it.node.scaleX() * scaleBy, MIN_SCALE, MAX_SCALE);
+  it.node.scale({ x: s, y: s });
+  it.node.rotation(it.node.rotation() + rotateBy);
+  it.scale = s; it.rotation = it.node.rotation();
+  if (it.acc.type === 'hang' && rotateBy) kick(it, Math.sign(rotateBy) * 0.6);
+  tr.forceUpdate(); overlayLayer.batchDraw(); it.node.getLayer().batchDraw();
+}
+
+// ---------------------------------------------------------------------------
+// Pendulum swing for hanging charms (simple damped pendulum driven by the
+// horizontal acceleration of its ring, so dragging also makes it sway)
+// ---------------------------------------------------------------------------
+const W0 = 2 * Math.PI / 0.85;   // natural angular frequency (period ≈ 0.85 s)
+const DAMP = 2.4;                // damping (1/s)
+const MAX_TH = 1.1;              // ≈ 63°
+
+function startSwing() {
+  if (swingAnim.isRunning()) return;
+  for (const it of items) { it.lastX = null; it.lastVx = 0; }   // avoid a fake acceleration spike
+  swingAnim.start();
+}
+function kick(it, dir) { it.om += 2.6 * (dir || 1); startSwing(); }   // ≈ 20° first swing
+
+const swingAnim = new Konva.Animation(frame => {
+  const dt = Math.min(frame.timeDiff, 34) / 1000;
+  if (!dt) return false;
+  let active = false;
+  for (const it of items) {
+    if (it.acc.type !== 'hang') continue;
+    const x = it.node.x();
+    const vx = it.lastX == null ? 0 : (x - it.lastX) / dt;
+    const ax = (vx - it.lastVx) / dt;
+    it.lastX = x; it.lastVx = vx;
+    const L = Math.max(30, it.len * it.node.scaleX());
+    const alpha = -W0 * W0 * Math.sin(it.th) - DAMP * it.om - clamp(ax / L, -60, 60) * Math.cos(it.th);
+    it.om += alpha * dt;
+    it.th = clamp(it.th + it.om * dt, -MAX_TH, MAX_TH);
+    if (Math.abs(it.th) < 0.002 && Math.abs(it.om) < 0.02 && Math.abs(vx) < 1) { it.th = 0; it.om = 0; }
+    else active = true;
+    it.image.rotation(it.th * 180 / Math.PI);
+  }
+  if (!active && !dragItem) { swingAnim.stop(); tr.forceUpdate(); }
+}, hangLayer);
+
+function settleSwing() {
+  for (const it of items) { it.th = 0; it.om = 0; it.image.rotation(0); }
+  swingAnim.stop(); hangLayer.draw();
+}
+
+// ---------------------------------------------------------------------------
+// Tray: pointer-based drag (works for mouse, pen and touch)
+// ---------------------------------------------------------------------------
+const ghost = $('ghost');
+let trayDrag = null;
+
+function buildTray() {
+  const tray = $('tray');
+  for (const acc of CONFIG.accessories) {
+    const b = document.createElement('button');
+    b.className = 'tray-item'; b.type = 'button'; b.dataset.acc = acc.id;
+    b.setAttribute('aria-label', `${acc.name} (${acc.type === 'hang' ? 'treo quai' : 'gắn mặt túi'}) — chạm để gắn`);
+    b.innerHTML = `<img src="${acc.src}" alt=""><span class="nm">${acc.name}</span><span class="tp">${acc.type === 'hang' ? 'treo quai' : 'gắn mặt túi'}</span>`;
+    b.addEventListener('pointerdown', onTrayDown);
+    b.addEventListener('click', e => { if (e.detail === 0) autoPlace(acc.id); }); // keyboard activation
+    tray.appendChild(b);
+  }
+}
+
+function onTrayDown(e) {
+  if (e.button !== 0 || !product) return;
+  if (trayDrag) endTrayDrag();
+  const btn = e.currentTarget;
+  try { btn.setPointerCapture(e.pointerId); } catch (_) { /* window listeners below still work */ }
+  trayDrag = { btn, acc: ACC[btn.dataset.acc], id: e.pointerId, x0: e.clientX, y0: e.clientY, started: false, snap: null };
+  window.addEventListener('pointermove', onTrayMove);
+  window.addEventListener('pointerup', onTrayUp);
+  window.addEventListener('pointercancel', onTrayCancel);
+}
+
+function clientToPhoto(cx, cy) {
+  const r = stageEl.getBoundingClientRect();
+  return { x: (cx - r.left) / viewScale, y: (cy - r.top) / viewScale, inside: cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom };
+}
+
+function onTrayMove(e) {
+  const d = trayDrag; if (!d || e.pointerId !== d.id) return;
+  if (!d.started) {
+    if (Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 6) return;
+    d.started = true; d.btn.classList.add('dragging');
+    const img = accImages[d.acc.id];
+    ghost.src = img.src;
+    d.w = d.acc.width * PW * viewScale; d.h = d.w * img.naturalHeight / img.naturalWidth;
+    ghost.style.width = d.w + 'px'; ghost.style.height = d.h + 'px'; ghost.style.display = 'block';
+    drawHints(d.acc.type, null);
+  }
+  // pivot position (in viewport px) = pointer, lifted above the finger on touch screens
+  let px = e.clientX, py = e.clientY - (e.pointerType === 'touch' ? TOUCH_LIFT : 0);
+  const p = clientToPhoto(px, py);
+  d.snap = p.inside ? findSnap(d.acc.type, p) : null;
+  if (d.snap) {   // magnet: show the ghost where it would land
+    const r = stageEl.getBoundingClientRect();
+    px = r.left + d.snap.point.x * viewScale; py = r.top + d.snap.point.y * viewScale;
+  }
+  ghost.style.transform = `translate(${px - d.acc.pivot[0] * d.w}px, ${py - d.acc.pivot[1] * d.h}px)`;
+  ghost.classList.toggle('invalid', !d.snap);
+  if (d.snap?.anchor !== hintTarget?.anchor) drawHints(d.acc.type, d.snap);
+}
+
+function endTrayDrag() {
+  const d = trayDrag; if (!d) return;
+  window.removeEventListener('pointermove', onTrayMove);
+  window.removeEventListener('pointerup', onTrayUp);
+  window.removeEventListener('pointercancel', onTrayCancel);
+  d.btn.classList.remove('dragging');
+  ghost.style.display = 'none'; ghost.classList.remove('invalid');
+  trayDrag = null;
+  clearHints();
+}
+
+function onTrayUp(e) {
+  const d = trayDrag; if (!d || e.pointerId !== d.id) return;
+  if (!d.started) { endTrayDrag(); autoPlace(d.acc.id); return; }   // a tap
+  const snap = d.snap;
+  endTrayDrag();
+  if (!snap) {
+    setStatus(d.acc.type === 'hang' ? 'Charm chỉ treo được vào quai / móc (vòng tròn).' : 'Ghim / nơ chỉ gắn được lên mặt túi (vùng nét đứt).');
+    return;
+  }
+  const n = toNorm(snap.point);
+  const it = createItem({ accessoryId: d.acc.id, anchorId: snap.anchor.id, x: n[0], y: n[1] });
+  select(it);
+  setStatus(`Đã gắn ${d.acc.name} vào ${snap.anchor.label}.`);
+}
+
+function onTrayCancel(e) { if (trayDrag && e.pointerId === trayDrag.id) endTrayDrag(); }
+
+/** Tap / keyboard: put the accessory at the first free compatible anchor. */
+function autoPlace(accId) {
+  const acc = ACC[accId];
+  const free = anchorsOfType(acc.type).filter(a => anchorFree(a));
+  if (!free.length) { setStatus(acc.type === 'hang' ? 'Các móc treo đã có charm — kéo charm cũ ra hoặc xóa bớt.' : 'Sản phẩm này không có vùng gắn.'); return; }
+  const a = free[0];
+  let p;
+  if (acc.type === 'hang') p = toPx(a.point);
+  else {
+    const poly = polyPx(a), c = centroid(poly);
+    const n = items.filter(i => i.anchorId === a.id).length;   // fan out repeated taps a little
+    const cand = { x: c.x + ((n % 3) - 1) * PW * 0.07, y: c.y + (Math.floor(n / 3) % 3 - 1) * PH * 0.05 };
+    p = pointInPoly(cand, poly) ? cand : c;
+  }
+  const n = toNorm(p);
+  select(createItem({ accessoryId: accId, anchorId: a.id, x: n[0], y: n[1] }));
+  setStatus(`Đã gắn ${acc.name} vào ${a.label}. Kéo để đổi vị trí.`);
+}
+
+// ---------------------------------------------------------------------------
+// Product loading & layout
+// ---------------------------------------------------------------------------
+function fit() {
+  const w = stageEl.clientWidth || 300;
+  viewScale = w / PW;
+  stage.size({ width: w, height: PH * viewScale });
+  stage.scale({ x: viewScale, y: viewScale });
+  stageEl.style.height = PH * viewScale + 'px';
+  drawHints(hintType, hintTarget);
+  stage.batchDraw();
+}
+
+function loadProduct(p) {
+  if (product) savedPerProduct[product.id] = serialize();
+  clearAll(true);
+  product = p;
+  const img = new Image();
+  img.onload = () => {
+    if (product !== p) return;
+    stageEl.querySelector('.msg')?.remove();
+    stage.container().style.display = '';
+    PW = img.naturalWidth; PH = img.naturalHeight;
+    photoNode.image(img); photoNode.size({ width: PW, height: PH });
+    fit();
+    const saved = savedPerProduct[p.id];
+    if (saved) restore(saved, { swing: false });
+  };
+  img.onerror = () => {
+    photoNode.image(null); photoLayer.draw();
+    let msg = stageEl.querySelector('.msg');
+    if (!msg) { msg = document.createElement('div'); msg.className = 'msg'; stageEl.appendChild(msg); }
+    stageEl.style.height = 'auto';
+    msg.innerHTML = `Không tải được ảnh <code>${p.image}</code>.<br>Hãy chạy <code>python3 -m http.server</code> từ thư mục gốc repo có thư mục <code>img/products/</code>.`;
+  };
+  img.src = p.image;
+}
+
+function clearAll(silent) {
+  select(null);
+  for (const it of items) it.node.destroy();
+  items = [];
+  surfaceLayer.batchDraw(); hangLayer.batchDraw();
+  if (!silent) setStatus('Đã xóa hết phụ kiện.');
+}
+
+// ---------------------------------------------------------------------------
+// Save / load / export
+// ---------------------------------------------------------------------------
+function serialize() {
+  return {
+    version: 1,
+    productId: product.id,
+    image: product.image,
+    accessories: items.map(it => ({
+      accessoryId: it.acc.id,
+      anchorId: it.anchorId,
+      x: round4(it.node.x() / PW),
+      y: round4(it.node.y() / PH),
+      scale: round4(it.node.scaleX()),
+      rotation: Math.round(it.node.rotation() * 10) / 10,
+    })),
+  };
+}
+
+function restore(design, opts) {
+  clearAll(true);
+  for (const a of design.accessories || []) {
+    const anchor = anchorById(a.anchorId);
+    if (!anchor || !ACC[a.accessoryId] || ACC[a.accessoryId].type !== anchor.type) { console.warn('Skipping incompatible entry', a); continue; }
+    createItem(a, opts);
+  }
+  stage.batchDraw();
+}
+
+$('btnSave').onclick = () => {
+  if (!product) return;
+  const design = serialize();
+  const json = JSON.stringify(design, null, 2);
+  $('jsonOut').value = json;
+  console.log('[accessory-composer] design', design);
+  setStatus(`Đã lưu thiết kế (${design.accessories.length} phụ kiện) — xem JSON bên phải / console.`);
+};
+
+$('btnLoad').onclick = () => {
+  let design;
+  try { design = JSON.parse($('jsonOut').value); } catch (err) { setStatus('JSON không hợp lệ: ' + err.message); return; }
+  const p = CONFIG.products.find(x => x.id === design.productId);
+  if (!p) { setStatus('Không có sản phẩm ' + design.productId); return; }
+  if (p !== product) { savedPerProduct[p.id] = design; $('productSelect').value = p.id; loadProduct(p); }
+  else restore(design, { swing: true });
+  setStatus('Đã nạp thiết kế từ JSON.');
+};
+
+$('btnPng').onclick = () => {
+  if (!product || !photoNode.image()) return;
+  const prevSel = selected;
+  select(null); settleSwing();
+  hintGroup.visible(false); overlayLayer.draw();
+  let url;
+  try {
+    url = stage.toDataURL({ pixelRatio: 1 / viewScale, mimeType: 'image/png' });   // native photo resolution
+  } catch (err) {
+    setStatus('Trình duyệt chặn xuất ảnh (mở qua file://?). Hãy chạy qua python3 -m http.server.');
+    console.error(err);
+  }
+  hintGroup.visible(true); select(prevSel);
+  if (!url) return;
+  $('pngImg').src = url; $('pngLink').href = url;
+  $('pngLink').download = `moc-sac-${product.id.toLowerCase()}-thiet-ke.png`;
+  $('pngOut').style.display = 'block';
+  $('pngLink').click();
+  setStatus(`Đã xuất PNG ${PW}×${PH}.`);
+};
+
+$('btnClear').onclick = () => clearAll(false);
+$('btnSmaller').onclick = () => adjustSelected({ scaleBy: 1 / 1.12 });
+$('btnBigger').onclick = () => adjustSelected({ scaleBy: 1.12 });
+$('btnRotL').onclick = () => adjustSelected({ rotateBy: -15 });
+$('btnRotR').onclick = () => adjustSelected({ rotateBy: 15 });
+$('btnDelete').onclick = () => removeItem(selected);
+
+document.addEventListener('keydown', e => {
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if ((e.key === 'Delete' || e.key === 'Backspace') && selected) { e.preventDefault(); removeItem(selected); }
+  if (e.key === 'Escape') select(null);
+});
+
+// click on empty photo: deselect; in hint mode also report the normalised point for anchor authoring
+stage.on('click tap', e => {
+  if (e.target !== photoNode) return;
+  select(null);
+  if (showHintsAlways) {
+    const p = stage.getRelativePointerPosition();
+    const n = toNorm(p).map(v => Math.round(v * 1000) / 1000);
+    setStatus(`Điểm [${n[0]}, ${n[1]}] (đã log ra console)`);
+    console.log('[accessory-composer] point', JSON.stringify(n));
+  }
+});
+
+$('optHints').onchange = e => { showHintsAlways = e.target.checked; clearHints(); };
+
+let statusTimer;
+function setStatus(text) {
+  $('status').textContent = text;
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => { $('status').textContent = ''; }, 5000);
+}
+
+// ---------------------------------------------------------------------------
+// Boot
+// ---------------------------------------------------------------------------
+function preload(acc) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => { accImages[acc.id] = img; resolve(); };
+    img.onerror = () => { console.error('Cannot load accessory', acc.src); resolve(); };
+    img.src = acc.src;
+  });
+}
+
+const sel = $('productSelect');
+for (const p of CONFIG.products) sel.add(new Option(p.name, p.id));
+sel.onchange = () => loadProduct(CONFIG.products.find(p => p.id === sel.value));
+
+buildTray();
+select(null);
+Promise.all(CONFIG.accessories.map(preload)).then(() => loadProduct(CONFIG.products[0]));
+new ResizeObserver(() => product && photoNode.image() && fit()).observe(stageEl);
+
+// handy for debugging / tests
+window.composer = { serialize, restore, get items() { return items; }, stage, CONFIG };
+})();
+</script>
+</body>
+</html>
