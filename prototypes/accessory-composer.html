@@ -33,6 +33,7 @@
          "id":    "LEN-01",
          "name":  "Túi nơ len màu be",
          "image": "../img/products/len-01-tui-no-be.jpg",
+         "mask":  "masks/len-01-mask.png",           // optional cut-out mask (alpha PNG, same size as the photo)
          "anchors": [
            { "id": "handle-left", "label": "Quai trái", "type": "hang",
              "point": [0.295, 0.13],                  // where the accessory's pivot (ring) attaches
@@ -55,9 +56,18 @@
  INTERACTION
    Drag from the tray (mouse, pen or touch) or tap a tray item to auto-place it on
    the first free compatible anchor. Anchor hints appear while dragging. Select a
-   placed item to move it, resize/rotate it (corner + rotate handles on desktop;
-   −/+/⟲/⟳ toolbar on every device, the only way on touch screens) or delete it
-   (Xóa button or Delete/Backspace). Charms sway while carried and swing on drop.
+   placed item to move it, resize/rotate it (corner + rotate handles or trackpad
+   pinch on desktop; two-finger pinch/twist on touch screens; −/+/⟲/⟳ toolbar on
+   every device) or delete it (Xóa button or Delete/Backspace). Charms sway while
+   carried and swing on drop. "Nền" switches between the original photo and the
+   bag cut out on a plain colour (needs the product's "mask").
+
+ CUT-OUT MASKS
+   prototypes/masks/*.png are alpha-only PNGs (~40 KB) made on-device with Apple
+   Vision by `sh prototypes/tools/make-masks.sh` (macOS 14+). The page multiplies
+   the photo by the mask at load time, so no second copy of each photo is needed.
+   The script's per-product keep/holes polygons trim what Vision also counts as
+   foreground (the hand under LEN-01, the flower basket beside LEN-13).
 
  TIP for authoring anchors: tick "Hiện điểm gắn" and click the photo — the
  normalised [x, y] of the click is shown under the stage and logged to the
@@ -65,6 +75,7 @@
 
  SAVED DESIGN ("Lưu thiết kế") — logged to the console and shown in the textarea:
    { "version": 1, "productId": "LEN-01",
+     "background": "photo",                            // or a plain colour such as "#F3EEE6"
      "accessories": [ { "accessoryId": "charm-heart", "anchorId": "handle-left",
                         "x": 0.295, "y": 0.13,        // normalised position of the accessory's pivot
                         "scale": 1, "rotation": 0 } ] } // rotation in degrees (user rotation, not the swing)
@@ -113,6 +124,12 @@
   .toolbar button { min-width: 44px; height: 40px; }
   .toolbar .sel-label { font-size: 13px; color: var(--muted); margin-right: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1 1 100%; }
   .status { min-height: 20px; font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .bg-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .bg-opt { height: 32px; font-size: 13px; padding: 0 10px; }
+  .bg-opt.sw { width: 32px; padding: 0; border-radius: 50%; background: var(--c); }
+  .bg-opt.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .bg-opt:disabled { opacity: .35; }
+  #stage { touch-action: pan-x pan-y; }   /* page can scroll over the photo, but pinches go to the composer */
   .opts { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: 4px; }
   .opts label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
 
@@ -166,6 +183,13 @@
       <button id="btnDelete" class="danger" title="Xóa (Delete)">Xóa</button>
     </div>
     <div class="status" id="status" aria-live="polite"></div>
+    <div class="bg-row" id="bgRow" role="group" aria-label="Nền ảnh">
+      <span>Nền:</span>
+      <button class="bg-opt on" data-bg="photo" aria-pressed="true">Ảnh gốc</button>
+      <button class="bg-opt sw" data-bg="#F3EEE6" style="--c:#F3EEE6" aria-pressed="false" aria-label="Nền kem" title="Nền kem"></button>
+      <button class="bg-opt sw" data-bg="#F4DDE2" style="--c:#F4DDE2" aria-pressed="false" aria-label="Nền hồng phấn" title="Nền hồng phấn"></button>
+      <button class="bg-opt sw" data-bg="#DCE5E1" style="--c:#DCE5E1" aria-pressed="false" aria-label="Nền xanh xám" title="Nền xanh xám"></button>
+    </div>
     <div class="opts">
       <label><input type="checkbox" id="optHints"> Hiện điểm gắn</label>
     </div>
@@ -205,28 +229,31 @@
   "products": [
     {
       "id": "LEN-01", "name": "LEN-01 · Túi nơ len màu be", "image": "../img/products/len-01-tui-no-be.jpg",
+      "mask": "masks/len-01-mask.png",
       "anchors": [
-        { "id": "handle-left",  "label": "Quai trái",  "type": "hang", "point": [0.292, 0.125] },
-        { "id": "handle-right", "label": "Quai phải",  "type": "hang", "point": [0.672, 0.135] },
-        { "id": "bow-knot",     "label": "Nút nơ",     "type": "hang", "point": [0.500, 0.345] },
+        { "id": "handle-left",  "label": "Quai trái",  "type": "hang", "point": [0.305, 0.165] },
+        { "id": "handle-right", "label": "Quai phải",  "type": "hang", "point": [0.683, 0.165] },
+        { "id": "bow-knot",     "label": "Nút nơ",     "type": "hang", "point": [0.490, 0.445] },
         { "id": "front", "label": "Thân trước", "type": "surface",
-          "polygon": [[0.36,0.47],[0.50,0.44],[0.64,0.47],[0.72,0.58],[0.70,0.69],[0.50,0.72],[0.30,0.69],[0.27,0.58]] },
+          "polygon": [[0.40,0.47],[0.57,0.47],[0.63,0.53],[0.68,0.60],[0.71,0.67],[0.66,0.70],[0.49,0.71],[0.31,0.70],[0.27,0.67],[0.30,0.60],[0.35,0.53]] },
         { "id": "bow", "label": "Cánh nơ", "type": "surface",
           "polygon": [[0.14,0.40],[0.20,0.22],[0.30,0.20],[0.42,0.32],[0.58,0.32],[0.72,0.17],[0.80,0.22],[0.86,0.40],[0.86,0.52],[0.62,0.43],[0.38,0.43],[0.14,0.52]] }
       ]
     },
     {
       "id": "LEN-13", "name": "LEN-13 · Túi tím nơ hồng", "image": "../img/products/len-13-tui-tim-no-hong.jpg",
+      "mask": "masks/len-13-mask.png",
       "anchors": [
-        { "id": "handle-left",  "label": "Quai trái", "type": "hang", "point": [0.560, 0.560] },
-        { "id": "handle-right", "label": "Quai phải", "type": "hang", "point": [0.918, 0.560] },
-        { "id": "bow-knot",     "label": "Nút nơ",    "type": "hang", "point": [0.745, 0.455] },
+        { "id": "handle-left",  "label": "Quai trái", "type": "hang", "point": [0.578, 0.585] },
+        { "id": "handle-right", "label": "Quai phải", "type": "hang", "point": [0.928, 0.585] },
+        { "id": "bow-knot",     "label": "Nút nơ",    "type": "hang", "point": [0.752, 0.480] },
         { "id": "front", "label": "Thân trước", "type": "surface",
-          "polygon": [[0.54,0.71],[0.95,0.71],[0.97,0.94],[0.53,0.95]] }
+          "polygon": [[0.55,0.72],[0.95,0.72],[0.965,0.95],[0.54,0.955]] }
       ]
     },
     {
       "id": "LEN-19", "name": "LEN-19 · Túi tote xanh trắng", "image": "../img/products/len-19-tui-tote-xanh-trang.jpg",
+      "mask": "masks/len-19-mask.png",
       "anchors": [
         { "id": "handle-left",  "label": "Quai trái", "type": "hang", "point": [0.425, 0.270] },
         { "id": "handle-right", "label": "Quai phải", "type": "hang", "point": [0.660, 0.310] },
@@ -278,11 +305,17 @@ const overlayLayer = new Konva.Layer();            // anchor hints + transformer
 stage.add(photoLayer, surfaceLayer, hangLayer, overlayLayer);
 const hintGroup = new Konva.Group({ listening: false });
 overlayLayer.add(hintGroup);
+const bgRect = new Konva.Rect({ x: 0, y: 0, visible: false });
 const photoNode = new Konva.Image({ x: 0, y: 0 });
-photoLayer.add(photoNode);
+// cut-out = photo × mask (see prototypes/tools/make-masks.sh); shown on a plain background
+const cutoutNode = new Konva.Image({ x: 0, y: 0, visible: false,
+  shadowColor: '#3A2A1C', shadowBlur: 28, shadowOffset: { x: 0, y: 14 }, shadowOpacity: 0.28 });
+photoLayer.add(bgRect, photoNode, cutoutNode);
+let background = 'photo';     // 'photo' or a CSS colour for the plain background
+let cutoutReady = false;
 
 // On touch screens accessories are only ~30 px wide at 375 px, so handles would cover them:
-// there the transformer is just a selection outline and the toolbar buttons do scale/rotate.
+// there the transformer is just a selection outline; pinch/twist and the toolbar do scale/rotate.
 const tr = new Konva.Transformer({
   keepRatio: true, flipEnabled: false, centeredScaling: false,
   enabledAnchors: IS_TOUCH ? [] : ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
@@ -675,6 +708,66 @@ function autoPlace(accId) {
 }
 
 // ---------------------------------------------------------------------------
+// Two-finger pinch / twist (touch) and trackpad pinch (ctrl + wheel) on an item
+// ---------------------------------------------------------------------------
+let pinch = null;
+
+function itemAtClient(cx, cy) {
+  const r = stageEl.getBoundingClientRect();
+  const shape = stage.getIntersection({ x: cx - r.left, y: cy - r.top });
+  return shape && items.find(it => it.node === shape.getParent());
+}
+
+function applyScaleRotate(it, s, rot) {
+  it.node.scale({ x: s, y: s }); it.node.rotation(rot);
+  if (it.acc.type === 'hang') it.node.position(toPx(anchorById(it.anchorId).point));
+  else { const r = clampToSurface(it.node.position(), it); if (r) it.node.position(r.point); }
+  it.scale = s; it.rotation = rot;
+  it.node.getLayer().batchDraw();
+}
+
+stage.on('touchstart touchmove', e => {
+  const t = e.evt.touches;
+  if (!t || t.length !== 2) return;
+  e.evt.preventDefault();
+  const d = Math.hypot(t[1].clientX - t[0].clientX, t[1].clientY - t[0].clientY);
+  const ang = Math.atan2(t[1].clientY - t[0].clientY, t[1].clientX - t[0].clientX) * 180 / Math.PI;
+  if (!pinch) {
+    // the item under the fingers wins; otherwise the selected one (tap an item, then pinch anywhere)
+    const it = itemAtClient((t[0].clientX + t[1].clientX) / 2, (t[0].clientY + t[1].clientY) / 2)
+            || itemAtClient(t[0].clientX, t[0].clientY) || itemAtClient(t[1].clientX, t[1].clientY) || selected;
+    if (!it) return;
+    for (const i of items) if (i.node.isDragging()) i.node.stopDrag();
+    it.node.draggable(false);
+    select(it); tr.visible(false); clearHints();
+    pinch = { it, d0: d || 1, a0: ang, s0: it.node.scaleX(), r0: it.node.rotation() };
+    return;
+  }
+  let dRot = ang - pinch.a0;
+  dRot = ((dRot + 540) % 360) - 180;                 // shortest way round
+  applyScaleRotate(pinch.it, clamp(pinch.s0 * d / pinch.d0, MIN_SCALE, MAX_SCALE), pinch.r0 + dRot);
+});
+
+stage.on('touchend touchcancel', e => {
+  if (!pinch || (e.evt.touches && e.evt.touches.length >= 2)) return;
+  const it = pinch.it; pinch = null;
+  it.node.draggable(true);
+  if (it.acc.type === 'hang') kick(it, 0.5);
+  it.node.getLayer().draw();   // refresh the hit canvas now so the next touch finds the item
+  tr.visible(true); tr.forceUpdate(); overlayLayer.batchDraw();
+  setStatus(`${it.acc.name}: ${Math.round(it.scale * 100)}% · ${Math.round(it.rotation)}°`);
+});
+
+// Mac trackpad pinch arrives as wheel + ctrlKey: scale the selected item instead of zooming the page
+stageEl.addEventListener('wheel', e => {
+  if (!e.ctrlKey || !selected) return;
+  e.preventDefault();
+  const it = selected;
+  applyScaleRotate(it, clamp(it.node.scaleX() * Math.exp(-e.deltaY * 0.01), MIN_SCALE, MAX_SCALE), it.node.rotation());
+  tr.forceUpdate(); overlayLayer.batchDraw();
+}, { passive: false });
+
+// ---------------------------------------------------------------------------
 // Product loading & layout
 // ---------------------------------------------------------------------------
 function fit() {
@@ -698,9 +791,13 @@ function loadProduct(p) {
     stage.container().style.display = '';
     PW = img.naturalWidth; PH = img.naturalHeight;
     photoNode.image(img); photoNode.size({ width: PW, height: PH });
+    bgRect.size({ width: PW, height: PH });
+    cutoutReady = false; cutoutNode.image(null);
+    setBackground(background);
     fit();
     const saved = savedPerProduct[p.id];
     if (saved) restore(saved, { swing: false });
+    if (p.mask) buildCutout(p, img);
   };
   img.onerror = () => {
     photoNode.image(null); photoLayer.draw();
@@ -710,6 +807,38 @@ function loadProduct(p) {
     msg.innerHTML = `Không tải được ảnh <code>${p.image}</code>.<br>Hãy chạy <code>python3 -m http.server</code> từ thư mục gốc repo có thư mục <code>img/products/</code>.`;
   };
   img.src = p.image;
+}
+
+/** Photo × alpha mask → transparent cut-out of the bag (mask PNGs are tiny: alpha only). */
+function buildCutout(p, photo) {
+  const m = new Image();
+  m.onload = () => {
+    if (product !== p) return;
+    const c = document.createElement('canvas');
+    c.width = PW; c.height = PH;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(photo, 0, 0, PW, PH);
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.drawImage(m, 0, 0, PW, PH);
+    cutoutNode.image(c); cutoutNode.size({ width: PW, height: PH });
+    cutoutReady = true;
+    setBackground(background);
+  };
+  m.onerror = () => console.warn('No cut-out mask for', p.id, p.mask);
+  m.src = p.mask;
+}
+
+function setBackground(bg) {
+  background = bg;
+  const plain = bg !== 'photo' && cutoutReady;
+  bgRect.fill(plain ? bg : null); bgRect.visible(plain);
+  photoNode.visible(!plain); cutoutNode.visible(plain);
+  for (const b of document.querySelectorAll('.bg-opt')) {
+    const on = b.dataset.bg === (plain ? bg : 'photo');
+    b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
+    if (b.dataset.bg !== 'photo') b.disabled = !cutoutReady;
+  }
+  photoLayer.batchDraw();
 }
 
 function clearAll(silent) {
@@ -728,6 +857,7 @@ function serialize() {
     version: 1,
     productId: product.id,
     image: product.image,
+    background,
     accessories: items.map(it => ({
       accessoryId: it.acc.id,
       anchorId: it.anchorId,
@@ -741,6 +871,7 @@ function serialize() {
 
 function restore(design, opts) {
   clearAll(true);
+  if (design.background) setBackground(design.background);
   for (const a of design.accessories || []) {
     const anchor = anchorById(a.anchorId);
     if (!anchor || !ACC[a.accessoryId] || ACC[a.accessoryId].type !== anchor.type) { console.warn('Skipping incompatible entry', a); continue; }
@@ -804,7 +935,7 @@ document.addEventListener('keydown', e => {
 
 // click on empty photo: deselect; in hint mode also report the normalised point for anchor authoring
 stage.on('click tap', e => {
-  if (e.target !== photoNode) return;
+  if (![photoNode, bgRect, cutoutNode, stage].includes(e.target)) return;
   select(null);
   if (showHintsAlways) {
     const p = stage.getRelativePointerPosition();
@@ -815,6 +946,7 @@ stage.on('click tap', e => {
 });
 
 $('optHints').onchange = e => { showHintsAlways = e.target.checked; clearHints(); };
+for (const b of document.querySelectorAll('.bg-opt')) b.onclick = () => setBackground(b.dataset.bg);
 
 let statusTimer;
 function setStatus(text) {
