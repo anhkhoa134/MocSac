@@ -110,8 +110,9 @@ function saveCurrencyToStorage() {
                 uploadCustomMotifBtn: "Tải ảnh thú cưng",
                 removePatchBtn: "Bỏ ảnh",
                 craftColorNote: "Màu trên ảnh chỉ để minh hoạ, màu len thực tế có thể chênh nhẹ.",
-                craftStep4Size: "4. Chọn Kích Cỡ",
-                craftStep4Name: "5. Thêu Tên Lên Túi (Miễn Phí)",
+                craftStep4Acc: "4. Thêm Phụ Kiện (Tuỳ Chọn)",
+                craftStep4Size: "5. Chọn Kích Cỡ",
+                craftStep4Name: "6. Thêu Tên Lên Túi (Miễn Phí)",
                 craftAddToCartBtn: "Chốt Mẫu Phối Này & Thêm Vào Giỏ",
                 roomModalTitle: "Phòng Thử Tranh Ảo — Xem Trước Tranh Trên Tường Nhà Bạn",
                 sofaScaleLabel: "Sofa Tiêu Chuẩn Dài 2.0m",
@@ -193,8 +194,9 @@ function saveCurrencyToStorage() {
                 uploadCustomMotifBtn: "Upload Pet Photo",
                 removePatchBtn: "Remove",
                 craftColorNote: "Colors are illustrative; actual yarn may vary slightly.",
-                craftStep4Size: "4. Select Size",
-                craftStep4Name: "5. Free Embroidered Name",
+                craftStep4Acc: "4. Add Accessories (Optional)",
+                craftStep4Size: "5. Select Size",
+                craftStep4Name: "6. Free Embroidered Name",
                 craftAddToCartBtn: "Save Design & Add to Bag",
                 roomModalTitle: "Virtual Room Preview — See Artwork on Your Wall",
                 sofaScaleLabel: "Standard 2.0m Sofa Reference",
@@ -641,8 +643,66 @@ function saveCurrencyToStorage() {
             zoneColors: [],   // colorId hoặc null (= màu gốc) cho từng vùng
             activeZone: 0,
             customUploadedImg: null,
+            accessories: [],  // { accId, anchorId, x, y } — x/y chuẩn hoá 0–1 (vị trí điểm pivot của phụ kiện)
             size: 'M', // 'S', 'M', 'L'
             customText: ''
+        };
+
+        // ---- Bước 4: phụ kiện ghép lên ảnh thật ----
+        // Ảnh phụ kiện hiện là hình minh hoạ SVG. Khi có ảnh chụp thật: tách nền thành PNG trong suốt,
+        // đặt vào img/accessories/ rồi đổi `src` (và `pivot` = điểm khoen treo / tâm, tính theo 0–1 của ảnh phụ kiện).
+        const craftAccessories = [
+            { id: 'charm-heart', vi: 'Charm tim', en: 'Heart charm', type: 'hang', src: 'img/accessories/charm-heart.svg', width: 0.085, pivot: [0.5, 0.093], priceVND: 35000 },
+            { id: 'charm-pompom', vi: 'Pompom len', en: 'Yarn pompom', type: 'hang', src: 'img/accessories/charm-pompom.svg', width: 0.095, pivot: [0.5, 0.088], priceVND: 30000 },
+            { id: 'pin-daisy', vi: 'Huy hiệu cúc', en: 'Daisy pin', type: 'surface', src: 'img/accessories/pin-daisy.svg', width: 0.10, pivot: [0.5, 0.5], priceVND: 25000 },
+            { id: 'bow-ribbon', vi: 'Nơ satin', en: 'Satin bow', type: 'surface', src: 'img/accessories/bow-ribbon.svg', width: 0.14, pivot: [0.5, 0.5], priceVND: 30000 }
+        ];
+        const CRAFT_MAX_SURFACE_ITEMS = 4;
+
+        // Toạ độ chuẩn hoá 0–1 theo ảnh sản phẩm. hang = điểm treo charm (mỗi điểm 1 món);
+        // front = vùng thân trước, tâm ghim/nơ phải nằm trong đó; spots = chỗ đặt sẵn (tuỳ chọn). scale = cỡ phụ kiện so với khung ảnh.
+        const craftAccessoryAnchors = {
+            'HM-BAG-SAKURA-04': {
+                scale: 1.25,
+                hang: [{ id: 'handle-left', vi: 'Quai trái', en: 'Left handle', p: [0.30, 0.095] },
+                       { id: 'handle-right', vi: 'Quai phải', en: 'Right handle', p: [0.615, 0.095] }],
+                front: [[0.14, 0.18], [0.80, 0.17], [0.80, 0.66], [0.68, 0.70], [0.27, 0.70], [0.14, 0.66]],
+                spots: [[0.70, 0.60], [0.22, 0.28], [0.40, 0.65], [0.74, 0.22]] // chỗ nền đen trống, tránh cành hoa
+            },
+            'HM-BAG-FUCHSIA-05': {
+                scale: 0.9,
+                hang: [{ id: 'handle-left', vi: 'Quai trái', en: 'Left handle', p: [0.578, 0.585] },
+                       { id: 'bow-knot', vi: 'Nút nơ', en: 'Bow knot', p: [0.752, 0.48] },
+                       { id: 'handle-right', vi: 'Quai phải', en: 'Right handle', p: [0.928, 0.585] }],
+                front: [[0.56, 0.73], [0.94, 0.73], [0.95, 0.94], [0.55, 0.945]]
+            },
+            'HM-BAG-OCEAN-02': {
+                scale: 1.1,
+                hang: [{ id: 'rim-left', vi: 'Miệng túi trái', en: 'Left rim', p: [0.21, 0.44] },
+                       { id: 'rim-right', vi: 'Miệng túi phải', en: 'Right rim', p: [0.81, 0.44] }],
+                front: [[0.17, 0.52], [0.83, 0.52], [0.83, 0.93], [0.17, 0.93]],
+                spots: [[0.74, 0.72], [0.24, 0.86], [0.76, 0.88], [0.45, 0.60]] // tránh cá & sao biển len có sẵn
+            },
+            'HM-BAG-SUNFLOWER-03': {
+                scale: 1.1,
+                hang: [{ id: 'strap-left', vi: 'Quai trái', en: 'Left strap', p: [0.40, 0.43] },
+                       { id: 'strap-right', vi: 'Quai phải', en: 'Right strap', p: [0.61, 0.44] }],
+                front: [[0.16, 0.52], [0.86, 0.51], [0.80, 0.93], [0.21, 0.93]]
+            },
+            'HM-POUCH-CAT-06': {
+                scale: 0.75,
+                hang: [{ id: 'zip-left', vi: 'Khoá kéo trái', en: 'Zip left', p: [0.33, 0.15] },
+                       { id: 'zip-right', vi: 'Khoá kéo phải', en: 'Zip right', p: [0.71, 0.15] }],
+                front: [[0.37, 0.22], [0.69, 0.22], [0.68, 0.47], [0.37, 0.47]],
+                spots: [[0.41, 0.25], [0.64, 0.25], [0.41, 0.44], [0.65, 0.44]] // bốn góc, chừa mặt mèo
+            },
+            'HM-SET-YELLOW-07': {
+                scale: 0.85,
+                hang: [{ id: 'bag-left', vi: 'Góc túi trái', en: 'Bag left corner', p: [0.27, 0.56] },
+                       { id: 'bag-right', vi: 'Góc túi phải', en: 'Bag right corner', p: [0.69, 0.56] }],
+                front: [[0.28, 0.61], [0.69, 0.61], [0.69, 0.86], [0.28, 0.86]]
+            }
+            // HM-DOLL-ROSE-01: búp bê không có quai / mặt túi → không gắn phụ kiện.
         };
 
         // ---- Color math (sRGB <-> CIELAB D65) with lookup tables for speed ----
@@ -809,6 +869,7 @@ function saveCurrencyToStorage() {
             const target = hmProducts.find(p => p.id === productId) || hmProducts[0];
             if (!target) return;
 
+            initCraftAccessoryDrag();
             populateCraftBaseSelector(target.id);
             applyDefaultCraftPresetForProduct(target.id);
             refreshCraftControls();
@@ -826,6 +887,8 @@ function saveCurrencyToStorage() {
             const cfg = craftPhotoBases[prodId];
             craftState.zoneColors = cfg ? cfg.zones.map(() => null) : [];
             craftState.activeZone = 0;
+            craftState.accessories = [];
+            craftAccDrag = null;
         }
 
         function onCraftBaseChange(prodId) {
@@ -837,6 +900,7 @@ function saveCurrencyToStorage() {
         function refreshCraftControls() {
             renderCraftZoneTabs();
             renderCraftColorSwatches();
+            renderCraftAccessoryControls();
             updateCraftUIButtons();
         }
 
@@ -992,7 +1056,8 @@ function saveCurrencyToStorage() {
         function getCustomizedCraftPrice() {
             const baseProd = products.find(p => p.id === craftState.baseProductId) || products[0];
             const multiplier = craftState.size === 'S' ? 0.85 : craftState.size === 'L' ? 1.2 : 1.0;
-            return Math.round((baseProd.priceVND * multiplier) / 10000) * 10000;
+            const accessoriesVND = craftState.accessories.reduce((sum, it) => sum + ((getCraftAccessory(it.accId) || {}).priceVND || 0), 0);
+            return Math.round((baseProd.priceVND * multiplier) / 10000) * 10000 + accessoriesVND;
         }
 
         // "Thân túi: Xanh Đại Dương • Hoa đào: Màu gốc"
@@ -1082,6 +1147,8 @@ function saveCurrencyToStorage() {
                 ctx.setLineDash([]);
             }
 
+            drawCraftAccessories(ctx, W, H);
+
             // Embroidered name tag (scaled to photo size)
             if (craftState.customText) {
                 const s = W / 380;
@@ -1111,10 +1178,276 @@ function saveCurrencyToStorage() {
             const baseProd = products.find(p => p.id === craftState.baseProductId) || products[0];
             const baseTitle = currentLang === 'vi' ? baseProd.title_vi : baseProd.title_en;
             const patchLabel = craftState.customUploadedImg ? (currentLang === 'vi' ? ' • Đính ảnh riêng' : ' • Photo patch') : '';
+            const accText = describeCraftAccessories(currentLang);
+            const accLabel = accText ? ` • + ${accText}` : '';
             document.getElementById('craftSummaryTitle').textContent = baseTitle;
             document.getElementById('craftSummarySpecs').textContent =
-                `${describeCraftColors()}${patchLabel} • Size ${craftState.size}${craftState.customText ? ` • "${craftState.customText}"` : ''}`;
+                `${describeCraftColors()}${patchLabel}${accLabel} • Size ${craftState.size}${craftState.customText ? ` • "${craftState.customText}"` : ''}`;
             document.getElementById('craftSummaryPrice').textContent = formatPrice(getCustomizedCraftPrice());
+        }
+
+        // ---- Accessories: load, place, drag & snap, draw ----
+        const craftAccessoryImages = {}; // accId -> HTMLImageElement
+        let craftAccDrag = null;         // { item, ox, oy } while a placed accessory is being dragged
+
+        function getCraftAccessory(accId) { return craftAccessories.find(a => a.id === accId); }
+
+        function loadCraftAccessoryImage(acc) {
+            if (!craftAccessoryImages[acc.id]) {
+                const img = new Image();
+                img.onload = () => renderCraftCustomCanvas();
+                img.src = acc.src;
+                craftAccessoryImages[acc.id] = img;
+            }
+            return craftAccessoryImages[acc.id];
+        }
+
+        function craftAccessoryLabel(acc) { return currentLang === 'vi' ? acc.vi : acc.en; }
+
+        // Pixel box of a placed accessory on a W×H photo (null until its image has loaded)
+        function craftAccessoryBox(item, W, H) {
+            const acc = getCraftAccessory(item.accId);
+            const img = acc && loadCraftAccessoryImage(acc);
+            if (!img || !img.complete || !img.naturalWidth) return null;
+            const anchors = craftAccessoryAnchors[craftState.baseProductId];
+            const w = acc.width * W * (anchors ? anchors.scale : 1);
+            const h = w * img.naturalHeight / img.naturalWidth;
+            return { acc, img, w, h, x: item.x * W - acc.pivot[0] * w, y: item.y * H - acc.pivot[1] * h };
+        }
+
+        // Surface items are drawn first, hanging charms on top of them
+        function craftAccessoriesInDrawOrder() {
+            const rank = it => (getCraftAccessory(it.accId) || {}).type === 'hang' ? 1 : 0;
+            return craftState.accessories.map((it, i) => [it, i])
+                .sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(p => p[0]);
+        }
+
+        function craftPointInPolygon(x, y, poly) {
+            let inside = false;
+            for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+                const [xi, yi] = poly[i], [xj, yj] = poly[j];
+                if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+            }
+            return inside;
+        }
+
+        function craftNearestPointOnPolygon(x, y, poly) {
+            let best = poly[0], bestD = Infinity;
+            for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+                const [ax, ay] = poly[j], [bx, by] = poly[i];
+                const dx = bx - ax, dy = by - ay;
+                const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy || 1)));
+                const px = ax + t * dx, py = ay + t * dy, d = (px - x) ** 2 + (py - y) ** 2;
+                if (d < bestD) { bestD = d; best = [px, py]; }
+            }
+            return best;
+        }
+
+        function craftFreeHangAnchors(except) {
+            const anchors = craftAccessoryAnchors[craftState.baseProductId];
+            if (!anchors) return [];
+            return anchors.hang.filter(h => !craftState.accessories.some(o => o !== except && o.anchorId === h.id));
+        }
+
+        // Charms jump to the nearest free hang point; pins/bows are pulled back inside the front panel
+        function snapCraftAccessory(item) {
+            const acc = getCraftAccessory(item.accId);
+            const anchors = craftAccessoryAnchors[craftState.baseProductId];
+            if (!acc || !anchors) return;
+            if (acc.type === 'hang') {
+                const free = craftFreeHangAnchors(item);
+                if (!free.length) return;
+                const near = free.reduce((a, b) =>
+                    ((a.p[0] - item.x) ** 2 + (a.p[1] - item.y) ** 2) <= ((b.p[0] - item.x) ** 2 + (b.p[1] - item.y) ** 2) ? a : b);
+                item.anchorId = near.id;
+                [item.x, item.y] = near.p;
+            } else {
+                item.anchorId = 'front';
+                if (!craftPointInPolygon(item.x, item.y, anchors.front)) {
+                    [item.x, item.y] = craftNearestPointOnPolygon(item.x, item.y, anchors.front);
+                }
+            }
+        }
+
+        function addCraftAccessory(accId) {
+            const acc = getCraftAccessory(accId);
+            const anchors = craftAccessoryAnchors[craftState.baseProductId];
+            if (!acc || !anchors) return;
+            if (acc.type === 'hang') {
+                const free = craftFreeHangAnchors(null)[0];
+                if (!free) {
+                    showToast(currentLang === 'vi'
+                        ? 'Các điểm treo đã có charm. Bỏ bớt một charm để thêm món mới.'
+                        : 'Every hanging point is taken. Remove a charm to add another.');
+                    return;
+                }
+                craftState.accessories.push({ accId, anchorId: free.id, x: free.p[0], y: free.p[1] });
+            } else {
+                const used = craftState.accessories.filter(o => o.anchorId === 'front').length;
+                if (used >= CRAFT_MAX_SURFACE_ITEMS) {
+                    showToast(currentLang === 'vi'
+                        ? `Tối đa ${CRAFT_MAX_SURFACE_ITEMS} ghim/nơ trên thân túi.`
+                        : `Up to ${CRAFT_MAX_SURFACE_ITEMS} pins/bows on the front.`);
+                    return;
+                }
+                const poly = anchors.front;
+                const cx = poly.reduce((s, p) => s + p[0], 0) / poly.length;
+                const cy = poly.reduce((s, p) => s + p[1], 0) / poly.length;
+                const spread = [[0, 0], [-0.13, -0.07], [0.13, 0.07], [0.12, -0.08]][used] || [0, 0];
+                const spot = anchors.spots && anchors.spots[used];
+                const item = spot ? { accId, anchorId: 'front', x: spot[0], y: spot[1] }
+                    : { accId, anchorId: 'front', x: cx + spread[0], y: cy + spread[1] };
+                snapCraftAccessory(item);
+                craftState.accessories.push(item);
+            }
+            renderCraftAccessoryControls();
+            renderCraftCustomCanvas();
+        }
+
+        function removeCraftAccessory(index) {
+            craftState.accessories.splice(index, 1);
+            renderCraftAccessoryControls();
+            renderCraftCustomCanvas();
+        }
+
+        function renderCraftAccessoryControls() {
+            const tray = document.getElementById('craftAccessoryTray');
+            const placed = document.getElementById('craftAccessoryPlaced');
+            const note = document.getElementById('craftAccessoryNote');
+            if (!tray || !placed) return;
+            const anchors = craftAccessoryAnchors[craftState.baseProductId];
+            const vi = currentLang === 'vi';
+
+            tray.classList.toggle('hidden', !anchors);
+            if (note) {
+                note.textContent = anchors
+                    ? (vi ? 'Chạm để thêm, rồi kéo trên ảnh để đổi chỗ. Charm tự bám vào điểm treo gần nhất.'
+                          : 'Tap to add, then drag on the photo to move it. Charms snap to the nearest hanging point.')
+                    : (vi ? 'Mẫu này chưa hỗ trợ gắn phụ kiện — hãy ghi chú khi đặt hàng nhé.'
+                          : 'Accessories are not available for this piece yet — add a note with your order.');
+            }
+
+            tray.innerHTML = craftAccessories.map(acc => `
+                <button type="button" onclick="addCraftAccessory('${acc.id}')"
+                    class="flex flex-col items-center gap-1 p-2 rounded-xl border border-stone-300 bg-linen hover:border-terracotta transition-colors">
+                    <img src="${acc.src}" alt="" class="h-9 w-9 object-contain pointer-events-none">
+                    <span class="text-[10px] sm:text-[11px] font-bold text-slateart leading-tight text-center">${craftAccessoryLabel(acc)}</span>
+                    <span class="text-[9px] sm:text-[10px] text-terracotta font-semibold">+${formatPrice(acc.priceVND)}</span>
+                </button>`).join('');
+
+            placed.innerHTML = craftState.accessories.map((item, i) => {
+                const acc = getCraftAccessory(item.accId);
+                return `<span class="inline-flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-full bg-terracotta/10 text-terracotta text-[11px] font-bold">
+                    ${craftAccessoryLabel(acc)}
+                    <button type="button" onclick="removeCraftAccessory(${i})" class="w-5 h-5 rounded-full hover:bg-terracotta/20 flex items-center justify-center" aria-label="${vi ? 'Bỏ' : 'Remove'}">
+                        <i class="fa-solid fa-xmark text-[10px]"></i>
+                    </button></span>`;
+            }).join('');
+            placed.classList.toggle('hidden', !craftState.accessories.length);
+
+            // Page can still scroll over the photo until there is something to drag
+            const canvas = document.getElementById('craftCustomCanvas');
+            if (canvas) {
+                canvas.style.touchAction = craftState.accessories.length ? 'none' : '';
+                canvas.style.cursor = craftState.accessories.length ? 'grab' : '';
+            }
+        }
+
+        function drawCraftAccessories(ctx, W, H) {
+            const anchors = craftAccessoryAnchors[craftState.baseProductId];
+            if (!anchors || !craftState.accessories.length) return;
+
+            if (craftAccDrag) {
+                // Placement hints while dragging
+                const s = W / 800;
+                ctx.save();
+                ctx.setLineDash([8 * s, 6 * s]);
+                ctx.lineWidth = 2.5 * s;
+                const dragType = getCraftAccessory(craftAccDrag.item.accId).type;
+                if (dragType === 'surface') {
+                    ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+                    ctx.beginPath();
+                    anchors.front.forEach(([x, y], k) => k ? ctx.lineTo(x * W, y * H) : ctx.moveTo(x * W, y * H));
+                    ctx.closePath();
+                    ctx.stroke();
+                } else {
+                    craftFreeHangAnchors(craftAccDrag.item).forEach(h => {
+                        ctx.fillStyle = 'rgba(178,83,62,0.35)';
+                        ctx.strokeStyle = '#FFFFFF';
+                        ctx.beginPath();
+                        ctx.arc(h.p[0] * W, h.p[1] * H, 16 * s, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                    });
+                }
+                ctx.restore();
+            }
+
+            craftAccessoriesInDrawOrder().forEach(item => {
+                const b = craftAccessoryBox(item, W, H);
+                if (!b) return;
+                ctx.save();
+                ctx.shadowColor = 'rgba(0,0,0,0.32)';
+                ctx.shadowBlur = W * 0.012;
+                ctx.shadowOffsetY = W * 0.006;
+                ctx.drawImage(b.img, b.x, b.y, b.w, b.h);
+                ctx.restore();
+            });
+        }
+
+        function initCraftAccessoryDrag() {
+            const canvas = document.getElementById('craftCustomCanvas');
+            if (!canvas || canvas.dataset.accDrag) return;
+            canvas.dataset.accDrag = '1';
+
+            const toNorm = e => {
+                const r = canvas.getBoundingClientRect();
+                return [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height];
+            };
+
+            canvas.addEventListener('pointerdown', e => {
+                if (!craftState.accessories.length) return;
+                const [nx, ny] = toNorm(e);
+                const W = canvas.width, H = canvas.height;
+                const hit = craftAccessoriesInDrawOrder().reverse().find(item => {
+                    const b = craftAccessoryBox(item, W, H);
+                    return b && nx * W >= b.x && nx * W <= b.x + b.w && ny * H >= b.y && ny * H <= b.y + b.h;
+                });
+                if (!hit) return;
+                e.preventDefault();
+                canvas.setPointerCapture(e.pointerId);
+                canvas.style.cursor = 'grabbing';
+                craftAccDrag = { item: hit, ox: nx - hit.x, oy: ny - hit.y };
+                renderCraftCustomCanvas();
+            });
+
+            canvas.addEventListener('pointermove', e => {
+                if (!craftAccDrag) return;
+                const [nx, ny] = toNorm(e);
+                craftAccDrag.item.x = Math.max(0, Math.min(1, nx - craftAccDrag.ox));
+                craftAccDrag.item.y = Math.max(0, Math.min(1, ny - craftAccDrag.oy));
+                renderCraftCustomCanvas();
+            });
+
+            const endDrag = () => {
+                if (!craftAccDrag) return;
+                snapCraftAccessory(craftAccDrag.item);
+                craftAccDrag = null;
+                canvas.style.cursor = 'grab';
+                renderCraftCustomCanvas();
+            };
+            canvas.addEventListener('pointerup', endDrag);
+            canvas.addEventListener('pointercancel', endDrag);
+        }
+
+        // "Charm tim, Nơ satin ×2" in the given language ('' when none)
+        function describeCraftAccessories(lang) {
+            const counts = {};
+            craftState.accessories.forEach(it => { counts[it.accId] = (counts[it.accId] || 0) + 1; });
+            return Object.entries(counts).map(([id, n]) => {
+                const acc = getCraftAccessory(id);
+                return `${lang === 'vi' ? acc.vi : acc.en}${n > 1 ? ' ×' + n : ''}`;
+            }).join(', ');
         }
 
         function addCustomizedHandmadeToCart() {
@@ -1142,6 +1475,8 @@ function saveCurrencyToStorage() {
             currentLang = lang;
             const patchVi = craftState.customUploadedImg ? ', đính ảnh riêng' : '';
             const patchEn = craftState.customUploadedImg ? ', photo patch' : '';
+            const accVi = craftState.accessories.length ? `, + ${describeCraftAccessories('vi')}` : '';
+            const accEn = craftState.accessories.length ? `, + ${describeCraftAccessories('en')}` : '';
             const nameNoteVi = craftState.customText ? ` (Thêu tên: ${craftState.customText})` : '';
             const nameNoteEn = craftState.customText ? ` (Name: ${craftState.customText})` : '';
 
@@ -1150,8 +1485,8 @@ function saveCurrencyToStorage() {
                 id: customId,
                 code: `${baseProd.code}-${craftState.size}`,
                 priceVND: finalPrice,
-                title_vi: `${baseProd.title_vi} [${colorsVi}${patchVi}, Size ${craftState.size}]${nameNoteVi}`,
-                title_en: `${baseProd.title_en} [${colorsEn}${patchEn}, Size ${craftState.size}]${nameNoteEn}`
+                title_vi: `${baseProd.title_vi} [${colorsVi}${patchVi}${accVi}, Size ${craftState.size}]${nameNoteVi}`,
+                title_en: `${baseProd.title_en} [${colorsEn}${patchEn}${accEn}, Size ${craftState.size}]${nameNoteEn}`
             };
 
             if (customImgUrl) customPhotoMap[customId] = customImgUrl;
