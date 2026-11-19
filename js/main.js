@@ -105,9 +105,10 @@ function saveCurrencyToStorage() {
                 craftBgLabel: "Đổi nền:",
                 phoneScaleLabel: "So sánh kích cỡ",
                 craftStep1: "1. Chọn Mẫu Đồ Len Bạn Thích",
-                craftStep2: "2. Đổi Màu Sợi Len / Vải",
-                craftStep3: "3. Chọn Họa Tiết Đính Nổi Hoặc Tải Ảnh Lên",
+                craftStep2: "2. Chọn Vùng & Đổi Màu Sợi Len",
+                craftStep3: "3. Đính Ảnh Thú Cưng (Tuỳ Chọn)",
                 uploadCustomMotifBtn: "Tải ảnh thú cưng",
+                removePatchBtn: "Bỏ ảnh",
                 craftStep4Size: "4. Chọn Kích Cỡ",
                 craftStep4Name: "5. Thêu Tên Lên Túi (Miễn Phí)",
                 craftAddToCartBtn: "Chốt Mẫu Phối Này & Thêm Vào Giỏ",
@@ -186,9 +187,10 @@ function saveCurrencyToStorage() {
                 craftBgLabel: "Backdrop:",
                 phoneScaleLabel: "Size Comparison",
                 craftStep1: "1. Choose Base Style",
-                craftStep2: "2. Pick Yarn / Fabric Color",
-                craftStep3: "3. Pick 3D Motif or Upload Pet Photo",
+                craftStep2: "2. Pick a Part & Yarn Color",
+                craftStep3: "3. Add a Pet Photo Patch (Optional)",
                 uploadCustomMotifBtn: "Upload Pet Photo",
+                removePatchBtn: "Remove",
                 craftStep4Size: "4. Select Size",
                 craftStep4Name: "5. Free Embroidered Name",
                 craftAddToCartBtn: "Save Design & Add to Bag",
@@ -269,6 +271,11 @@ function saveCurrencyToStorage() {
             }
             if (typeof populateCraftBaseSelector === 'function' && document.getElementById('craftBaseSelect')) {
                 populateCraftBaseSelector();
+                const craftModal = document.getElementById('handmadeCustomizerModal');
+                if (craftModal && !craftModal.classList.contains('hidden')) {
+                    refreshCraftControls();
+                    renderCraftCustomCanvas();
+                }
             }
             saveLangToStorage();
         }
@@ -576,27 +583,210 @@ function saveCurrencyToStorage() {
             closeRoomPreviewModal();
         }
 
-        // --- 8B. HANDMADE 3D STUDIO CUSTOMIZER (COLOR, MOTIF, CUSTOM IMAGE, SIZE, TEXT) ---
+        // --- 8B. HANDMADE STUDIO CUSTOMIZER — RECOLOR REAL PRODUCT PHOTOS (COLOR ZONES, PET PATCH, SIZE, NAME) ---
+        // Mỗi mẫu dùng ảnh chụp thật + 1 file mask PNG (kênh R/G/B = vùng 1/2/3) tạo bằng tools/mask-builder.html.
+        // Tô màu trong không gian CIELAB: giữ độ sáng (vân len, bóng đổ), thay sắc độ bằng màu khách chọn.
         const craftPalettes = [
-            { id: 'black', hex: '#1F2226', accent: '#373B42', vi: 'Đen Tuyền', en: 'Jet Black' },
-            { id: 'pink', hex: '#F48FB1', accent: '#FCE4EC', vi: 'Hồng Phấn Ombre', en: 'Blossom Pink' },
-            { id: 'fuchsia', hex: '#D81B60', accent: '#F06292', vi: 'Hồng Cánh Sen', en: 'Fuchsia Rose' },
-            { id: 'yellow', hex: '#FDD835', accent: '#FFF59D', vi: 'Vàng Nắng Mai', en: 'Sunny Yellow' },
-            { id: 'taupe', hex: '#9A8B7A', accent: '#D7CCC8', vi: 'Nâu Mộc Linen', en: 'Taupe Linen' },
-            { id: 'cream', hex: '#F2DEC4', accent: '#FFF8E1', vi: 'Kem Mèo Cam', en: 'Warm Cream' },
-            { id: 'sage', hex: '#689F38', accent: '#C5E1A5', vi: 'Xanh Lá Mạ', en: 'Sage Green' },
-            { id: 'ocean', hex: '#0288D1', accent: '#B3E5FC', vi: 'Xanh Đại Dương', en: 'Ocean Blue' }
+            { id: 'black', hex: '#1F2226', vi: 'Đen Tuyền', en: 'Jet Black' },
+            { id: 'ivory', hex: '#F1EBDD', vi: 'Trắng Ngà', en: 'Ivory' },
+            { id: 'cream', hex: '#E9D3B4', vi: 'Kem Sữa', en: 'Warm Cream' },
+            { id: 'taupe', hex: '#9A8B7A', vi: 'Nâu Mộc Linen', en: 'Taupe Linen' },
+            { id: 'yellow', hex: '#F2C94C', vi: 'Vàng Nắng Mai', en: 'Sunny Yellow' },
+            { id: 'pink', hex: '#F4A6BE', vi: 'Hồng Phấn', en: 'Blossom Pink' },
+            { id: 'fuchsia', hex: '#C2185B', vi: 'Hồng Cánh Sen', en: 'Fuchsia Rose' },
+            { id: 'burgundy', hex: '#7E2233', vi: 'Đỏ Rượu Vang', en: 'Burgundy' },
+            { id: 'lavender', hex: '#A48BC9', vi: 'Tím Oải Hương', en: 'Lavender' },
+            { id: 'sage', hex: '#8FAF6A', vi: 'Xanh Lá Mạ', en: 'Sage Green' },
+            { id: 'ocean', hex: '#2B7BB9', vi: 'Xanh Đại Dương', en: 'Ocean Blue' },
+            { id: 'navy', hex: '#26365C', vi: 'Xanh Navy', en: 'Navy' }
         ];
+
+        // patch = [x, y, r] vị trí đính ảnh thú cưng (pixel trên ảnh gốc 800x800)
+        const craftPhotoBases = {
+            'HM-BAG-SAKURA-04': {
+                photo: 'img/products/len-12-tui-hoa-dao.jpg', mask: 'img/masks/len-12-tui-hoa-dao.png', patch: [150, 230, 62],
+                zones: [{ vi: 'Thân túi & quai', en: 'Body & handle' }, { vi: 'Hoa đào', en: 'Blossoms' }]
+            },
+            'HM-BAG-FUCHSIA-05': {
+                photo: 'img/products/len-13-tui-tim-no-hong.jpg', mask: 'img/masks/len-13-tui-tim-no-hong.png', patch: [590, 680, 64],
+                zones: [{ vi: 'Thân túi', en: 'Body' }, { vi: 'Nơ & quai', en: 'Bow & strap' }]
+            },
+            'HM-BAG-OCEAN-02': {
+                photo: 'img/products/len-15-tui-hong-soc-charm.jpg', mask: 'img/masks/len-15-tui-hong-soc-charm.png', patch: [560, 650, 58],
+                zones: [{ vi: 'Thân túi', en: 'Body' }]
+            },
+            'HM-BAG-SUNFLOWER-03': {
+                photo: 'img/products/len-11-tui-huong-duong.jpg', mask: 'img/masks/len-11-tui-huong-duong.png', patch: [420, 560, 66],
+                zones: [{ vi: 'Sợi nền & quai', en: 'Base yarn & strap' }, { vi: 'Cánh hoa', en: 'Petals' }]
+            },
+            'HM-POUCH-CAT-06': {
+                photo: 'img/products/len-09-tui-meo-cam.jpg', mask: 'img/masks/len-09-tui-meo-cam.png', patch: [650, 330, 44],
+                zones: [{ vi: 'Thân ví', en: 'Pouch body' }, { vi: 'Mặt mèo', en: 'Cat face' }]
+            },
+            'HM-SET-YELLOW-07': {
+                photo: 'img/products/len-02-set-mu-tui-vang.jpg', mask: 'img/masks/len-02-set-mu-tui-vang.png', patch: [379, 610, 64],
+                zones: [{ vi: 'Nón', en: 'Hat' }, { vi: 'Túi', en: 'Bag' }]
+            },
+            // Tóc len và bàn tay cầm búp bê trùng màu nên chưa tách mask tự động được → chỉ xem ảnh gốc.
+            'HM-DOLL-ROSE-01': {
+                photo: 'img/products/len-18-bup-be-toc-hong.jpg', mask: null, patch: [400, 560, 42],
+                zones: []
+            }
+        };
 
         let craftState = {
             baseProductId: 'HM-BAG-SAKURA-04',
-            colorId: 'black',
-            motif: 'sakura', // 'sakura', 'sunflower', 'ocean', 'cat', 'bow', 'custom_img'
+            zoneColors: [],   // colorId hoặc null (= màu gốc) cho từng vùng
+            activeZone: 0,
             customUploadedImg: null,
             size: 'M', // 'S', 'M', 'L'
             customText: ''
         };
 
+        // ---- Color math (sRGB <-> CIELAB D65) with lookup tables for speed ----
+        const craftSrgbToLinear = new Float32Array(256);
+        for (let i = 0; i < 256; i++) {
+            const c = i / 255;
+            craftSrgbToLinear[i] = c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+        }
+        const CRAFT_LIN_LUT_SIZE = 4096;
+        const craftLinearToSrgb = new Uint8ClampedArray(CRAFT_LIN_LUT_SIZE + 1);
+        for (let i = 0; i <= CRAFT_LIN_LUT_SIZE; i++) {
+            const c = i / CRAFT_LIN_LUT_SIZE;
+            craftLinearToSrgb[i] = Math.round(255 * (c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055));
+        }
+        function craftLabF(t) { return t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116; }
+        function craftLabFInv(t) { const t3 = t * t * t; return t3 > 0.008856 ? t3 : (t - 16 / 116) / 7.787; }
+        function craftRgbToLab(r, g, b) {
+            const lr = craftSrgbToLinear[r], lg = craftSrgbToLinear[g], lb = craftSrgbToLinear[b];
+            const fx = craftLabF((lr * 0.4124 + lg * 0.3576 + lb * 0.1805) / 0.95047);
+            const fy = craftLabF(lr * 0.2126 + lg * 0.7152 + lb * 0.0722);
+            const fz = craftLabF((lr * 0.0193 + lg * 0.1192 + lb * 0.9505) / 1.08883);
+            return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
+        }
+        function craftLinToByte(v) {
+            return craftLinearToSrgb[Math.round(Math.min(1, Math.max(0, v)) * CRAFT_LIN_LUT_SIZE)];
+        }
+        function craftHexToLab(hex) {
+            const n = parseInt(hex.slice(1), 16);
+            return craftRgbToLab(n >> 16, (n >> 8) & 255, n & 255);
+        }
+
+        // ---- Photo + mask loading (cached per product) ----
+        const craftPhotoCache = {};   // prodId -> Promise<entry>
+        const craftPhotoEntries = {}; // prodId -> entry (once loaded)
+
+        function loadCraftImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error('Cannot load ' + src));
+                img.src = src;
+            });
+        }
+
+        function loadCraftPhotoBase(prodId) {
+            const cfg = craftPhotoBases[prodId];
+            if (!cfg) return Promise.resolve(null);
+            if (craftPhotoCache[prodId]) return craftPhotoCache[prodId];
+
+            craftPhotoCache[prodId] = Promise.all([
+                loadCraftImage(cfg.photo),
+                cfg.mask ? loadCraftImage(cfg.mask) : Promise.resolve(null)
+            ]).then(([photo, maskImg]) => {
+                const W = photo.naturalWidth, H = photo.naturalHeight, N = W * H;
+                const entry = { cfg, photo, W, H, canRecolor: false, lastKey: null, lastImage: null };
+                const work = document.createElement('canvas');
+                work.width = W; work.height = H;
+                const wctx = work.getContext('2d', { willReadFrequently: true });
+                wctx.drawImage(photo, 0, 0);
+
+                let base;
+                try {
+                    base = wctx.getImageData(0, 0, W, H);
+                } catch (err) {
+                    // Canvas bị "tainted" khi mở trang bằng file:// → chỉ hiển thị ảnh gốc.
+                    return entry;
+                }
+                entry.base = base;
+                if (!maskImg || !cfg.zones.length) return entry;
+
+                // Source lightness L* for every pixel (a*/b* are replaced, so not stored)
+                const L = new Float32Array(N), d = base.data;
+                for (let i = 0, p = 0; i < N; i++, p += 4) {
+                    const lr = craftSrgbToLinear[d[p]], lg = craftSrgbToLinear[d[p + 1]], lb = craftSrgbToLinear[d[p + 2]];
+                    L[i] = 116 * craftLabF(lr * 0.2126 + lg * 0.7152 + lb * 0.0722) - 16;
+                }
+
+                wctx.clearRect(0, 0, W, H);
+                wctx.drawImage(maskImg, 0, 0, W, H);
+                const md = wctx.getImageData(0, 0, W, H).data;
+                entry.zones = cfg.zones.map((z, k) => {
+                    const idx = [], weight = [];
+                    let sum = 0, sum2 = 0, n = 0;
+                    for (let i = 0; i < N; i++) {
+                        const m = md[i * 4 + k];
+                        if (m < 2) continue;
+                        idx.push(i); weight.push(m / 255);
+                        if (m > 127) { sum += L[i]; sum2 += L[i] * L[i]; n++; }
+                    }
+                    const mean = n ? sum / n : 50;
+                    const std = n ? Math.sqrt(Math.max(1, sum2 / n - mean * mean)) : 8;
+                    return { idx: Uint32Array.from(idx), weight: Float32Array.from(weight), mean, std };
+                });
+                entry.L = L;
+                entry.canRecolor = true;
+                return entry;
+            }).then(entry => {
+                craftPhotoEntries[prodId] = entry;
+                return entry;
+            }).catch(err => {
+                delete craftPhotoCache[prodId];
+                throw err;
+            });
+            return craftPhotoCache[prodId];
+        }
+
+        // Recolor one zone: keep the yarn's relative light/shadow (normalized), swap hue & chroma.
+        function recolorCraftZone(entry, zone, out, hex) {
+            const [Lt, at, bt] = craftHexToLab(hex);
+            // Texture contrast: follow the source, but keep it readable on very dark/light targets.
+            const darkness = Math.min(1, Lt / 55);
+            const targetStd = Math.min(13, Math.max(6, zone.std)) * (0.5 + 0.5 * darkness);
+            const meanL = Math.min(Lt, 97 - 1.4 * targetStd);
+            const k = targetStd / zone.std;
+            const L = entry.L, { idx, weight } = zone;
+            for (let j = 0; j < idx.length; j++) {
+                const i = idx[j], m = weight[j];
+                const Ln = Math.max(0, Math.min(100, meanL + (L[i] - zone.mean) * k));
+                // shadows carry slightly less chroma, highlights slightly more → looks like real dyed yarn
+                const c = 0.8 + 0.2 * Math.min(1.5, Ln / Math.max(8, meanL));
+                const fy = (Ln + 16) / 116, fx = fy + (at * c) / 500, fz = fy - (bt * c) / 200;
+                const x = craftLabFInv(fx) * 0.95047, y = craftLabFInv(fy), z = craftLabFInv(fz) * 1.08883;
+                const r = craftLinToByte(x * 3.2406 - y * 1.5372 - z * 0.4986);
+                const g = craftLinToByte(-x * 0.9689 + y * 1.8758 + z * 0.0415);
+                const b = craftLinToByte(x * 0.0557 - y * 0.2040 + z * 1.0570);
+                const p = i * 4;
+                out[p] = out[p] * (1 - m) + r * m;
+                out[p + 1] = out[p + 1] * (1 - m) + g * m;
+                out[p + 2] = out[p + 2] * (1 - m) + b * m;
+            }
+        }
+
+        function getRecoloredCraftImage(entry) {
+            const key = craftState.zoneColors.map(c => c || '-').join('|');
+            if (entry.lastKey === key) return entry.lastImage;
+            const out = new ImageData(new Uint8ClampedArray(entry.base.data), entry.W, entry.H);
+            entry.zones.forEach((zone, k) => {
+                const pal = craftPalettes.find(c => c.id === craftState.zoneColors[k]);
+                if (pal) recolorCraftZone(entry, zone, out.data, pal.hex);
+            });
+            entry.lastKey = key;
+            entry.lastImage = out;
+            return out;
+        }
+
+        // ---- UI ----
         function populateCraftBaseSelector(targetId) {
             const select = document.getElementById('craftBaseSelect');
             if (!select) return;
@@ -617,13 +807,9 @@ function saveCurrencyToStorage() {
             const target = hmProducts.find(p => p.id === productId) || hmProducts[0];
             if (!target) return;
 
-            // Populate base item selector & build custom dropdown
             populateCraftBaseSelector(target.id);
-
-            // Set initial defaults based on chosen product
             applyDefaultCraftPresetForProduct(target.id);
-            renderCraftColorSwatches();
-            updateCraftUIButtons();
+            refreshCraftControls();
             renderCraftCustomCanvas();
 
             document.getElementById('handmadeCustomizerModal').classList.remove('hidden');
@@ -635,64 +821,101 @@ function saveCurrencyToStorage() {
 
         function applyDefaultCraftPresetForProduct(prodId) {
             craftState.baseProductId = prodId;
-            if (prodId === 'HM-DOLL-ROSE-01') {
-                craftState.colorId = 'pink';
-                craftState.motif = 'bow';
-            } else if (prodId === 'HM-BAG-OCEAN-02') {
-                craftState.colorId = 'pink';
-                craftState.motif = 'ocean';
-            } else if (prodId === 'HM-BAG-SUNFLOWER-03') {
-                craftState.colorId = 'taupe';
-                craftState.motif = 'sunflower';
-            } else if (prodId === 'HM-BAG-SAKURA-04') {
-                craftState.colorId = 'black';
-                craftState.motif = 'sakura';
-            } else if (prodId === 'HM-BAG-FUCHSIA-05') {
-                craftState.colorId = 'fuchsia';
-                craftState.motif = 'bow';
-            } else if (prodId === 'HM-POUCH-CAT-06') {
-                craftState.colorId = 'cream';
-                craftState.motif = 'cat';
-            } else {
-                craftState.colorId = 'yellow';
-                craftState.motif = 'sakura';
-            }
+            const cfg = craftPhotoBases[prodId];
+            craftState.zoneColors = cfg ? cfg.zones.map(() => null) : [];
+            craftState.activeZone = 0;
         }
 
         function onCraftBaseChange(prodId) {
             applyDefaultCraftPresetForProduct(prodId);
+            refreshCraftControls();
+            renderCraftCustomCanvas();
+        }
+
+        function refreshCraftControls() {
+            renderCraftZoneTabs();
             renderCraftColorSwatches();
             updateCraftUIButtons();
-            renderCraftCustomCanvas();
+        }
+
+        function craftZoneLabel(zone) {
+            return currentLang === 'vi' ? zone.vi : zone.en;
+        }
+
+        function craftColorLabel(colorId) {
+            const pal = craftPalettes.find(c => c.id === colorId);
+            if (!pal) return currentLang === 'vi' ? 'Màu gốc' : 'Original';
+            return currentLang === 'vi' ? pal.vi : pal.en;
+        }
+
+        function renderCraftZoneTabs() {
+            const container = document.getElementById('craftZoneTabs');
+            if (!container) return;
+            const cfg = craftPhotoBases[craftState.baseProductId];
+            const zones = cfg ? cfg.zones : [];
+            if (zones.length < 2) {
+                container.innerHTML = '';
+                container.classList.add('hidden');
+                return;
+            }
+            container.classList.remove('hidden');
+            container.innerHTML = zones.map((z, k) => {
+                const active = k === craftState.activeZone;
+                const pal = craftPalettes.find(c => c.id === craftState.zoneColors[k]);
+                const dot = pal
+                    ? `<span class="w-3 h-3 rounded-full border border-black/10" style="background:${pal.hex}"></span>`
+                    : `<span class="w-3 h-3 rounded-full border border-stone-400 bg-[conic-gradient(#F4A6BE,#F2C94C,#8FAF6A,#2B7BB9,#F4A6BE)]"></span>`;
+                return `<button type="button" onclick="setCraftActiveZone(${k})"
+                    class="px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold flex items-center gap-1.5 border transition-colors ${active ? 'bg-slateart text-white border-slateart' : 'bg-linen text-slateart border-stone-300 hover:border-slateart'}">
+                    ${dot}<span>${craftZoneLabel(z)}</span>
+                </button>`;
+            }).join('');
+        }
+
+        function setCraftActiveZone(k) {
+            craftState.activeZone = k;
+            renderCraftZoneTabs();
+            renderCraftColorSwatches();
         }
 
         function renderCraftColorSwatches() {
             const container = document.getElementById('craftColorSwatches');
-            const activePal = craftPalettes.find(c => c.id === craftState.colorId) || craftPalettes[0];
-            document.getElementById('craftColorNameLabel').textContent = currentLang === 'vi' ? activePal.vi : activePal.en;
+            const label = document.getElementById('craftColorNameLabel');
+            const cfg = craftPhotoBases[craftState.baseProductId];
+            if (!cfg || !cfg.zones.length) {
+                label.textContent = '';
+                container.innerHTML = `<p class="text-xs text-stone-600 leading-relaxed">${currentLang === 'vi'
+                    ? 'Mẫu này phối màu theo tư vấn riêng — ghi màu mong muốn ở mục ghi chú khi đặt hàng, nghệ nhân sẽ gửi bảng sợi để bạn chọn.'
+                    : 'Colors for this piece are chosen with our artisan — note your preferred colors when ordering and we will send yarn swatches.'}</p>`;
+                return;
+            }
+            const currentId = craftState.zoneColors[craftState.activeZone] || null;
+            label.textContent = craftColorLabel(currentId);
 
-            container.innerHTML = craftPalettes.map(c => {
-                const isSelected = c.id === craftState.colorId;
+            const originalBtn = `
+                <button type="button" onclick="selectCraftColor(null)"
+                    class="w-9 h-9 rounded-full border-2 transition-transform flex items-center justify-center bg-white text-slateart ${!currentId ? 'scale-110 border-terracotta ring-2 ring-terracotta/40' : 'border-stone-300 hover:scale-105'}"
+                    title="${currentLang === 'vi' ? 'Màu gốc' : 'Original'}">
+                    <i class="fa-solid fa-rotate-left text-xs"></i>
+                </button>`;
+            container.innerHTML = originalBtn + craftPalettes.map(c => {
+                const isSelected = c.id === currentId;
+                const lightSwatch = ['ivory', 'cream', 'yellow', 'pink'].includes(c.id);
                 return `
                     <button type="button" onclick="selectCraftColor('${c.id}')"
                         class="w-9 h-9 rounded-full border-2 transition-transform flex items-center justify-center ${isSelected ? 'scale-110 border-terracotta ring-2 ring-terracotta/40' : 'border-stone-300 hover:scale-105'}"
                         style="background-color: ${c.hex};"
                         title="${currentLang === 'vi' ? c.vi : c.en}">
-                        ${isSelected ? `<i class="fa-solid fa-check text-xs ${c.id === 'yellow' || c.id === 'cream' || c.id === 'pink' ? 'text-slateart' : 'text-white'}"></i>` : ''}
+                        ${isSelected ? `<i class="fa-solid fa-check text-xs ${lightSwatch ? 'text-slateart' : 'text-white'}"></i>` : ''}
                     </button>
                 `;
             }).join('');
         }
 
         function selectCraftColor(colorId) {
-            craftState.colorId = colorId;
+            craftState.zoneColors[craftState.activeZone] = colorId;
+            renderCraftZoneTabs();
             renderCraftColorSwatches();
-            renderCraftCustomCanvas();
-        }
-
-        function setCraftMotif(motifId) {
-            craftState.motif = motifId;
-            updateCraftUIButtons();
             renderCraftCustomCanvas();
         }
 
@@ -704,16 +927,22 @@ function saveCurrencyToStorage() {
                 const img = new Image();
                 img.onload = function() {
                     craftState.customUploadedImg = img;
-                    craftState.motif = 'custom_img';
                     updateCraftUIButtons();
                     renderCraftCustomCanvas();
                     showToast(currentLang === 'vi'
-                        ? 'Đã gắn ảnh mẫu của bạn lên sản phẩm handmade!'
-                        : 'Applied your custom image onto the handmade preview!');
+                        ? 'Đã đính ảnh của bạn lên sản phẩm handmade!'
+                        : 'Applied your photo patch onto the handmade preview!');
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function removeCraftCustomImage() {
+            craftState.customUploadedImg = null;
+            updateCraftUIButtons();
+            renderCraftCustomCanvas();
         }
 
         function setCraftSize(sizeCode) {
@@ -732,16 +961,9 @@ function saveCurrencyToStorage() {
         }
 
         function updateCraftUIButtons() {
-            // Update Motif Buttons
-            document.querySelectorAll('.motif-btn').forEach(btn => {
-                btn.className = "motif-btn px-3 py-2 rounded-xl border border-stone-300 bg-linen font-semibold text-left flex items-center gap-2";
-            });
-            const activeMotifBtn = document.getElementById('motif-' + craftState.motif);
-            if (activeMotifBtn) {
-                activeMotifBtn.className = "motif-btn px-3 py-2 rounded-xl border-2 border-slateart bg-slateart text-white font-semibold text-left flex items-center gap-2";
-            }
+            const removeBtn = document.getElementById('craftRemovePatchBtn');
+            if (removeBtn) removeBtn.classList.toggle('hidden', !craftState.customUploadedImg);
 
-            // Update Size Buttons & Canvas Scale
             ['S', 'M', 'L'].forEach(sz => {
                 const btn = document.getElementById('sizeBtn-' + sz);
                 if (sz === craftState.size) {
@@ -771,264 +993,153 @@ function saveCurrencyToStorage() {
             return Math.round((baseProd.priceVND * multiplier) / 10000) * 10000;
         }
 
+        // "Thân túi: Xanh Đại Dương • Hoa đào: Màu gốc"
+        function describeCraftColors() {
+            const cfg = craftPhotoBases[craftState.baseProductId];
+            if (!cfg || !cfg.zones.length) return currentLang === 'vi' ? 'Màu theo tư vấn' : 'Artisan-matched colors';
+            if (cfg.zones.length === 1) return craftColorLabel(craftState.zoneColors[0]);
+            return cfg.zones.map((z, k) => `${craftZoneLabel(z)}: ${craftColorLabel(craftState.zoneColors[k])}`).join(', ');
+        }
+
+        let craftRenderToken = 0;
         function renderCraftCustomCanvas() {
             const canvas = document.getElementById('craftCustomCanvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
-            const w = canvas.width;
-            const h = canvas.height;
+            const prodId = craftState.baseProductId;
+            const token = ++craftRenderToken;
 
-            const baseProd = products.find(p => p.id === craftState.baseProductId) || products[0];
-            const pal = craftPalettes.find(c => c.id === craftState.colorId) || craftPalettes[0];
+            updateCraftSummary();
 
-            // Clear & Soft Studio Backdrop
-            ctx.fillStyle = '#F7F4EE';
-            ctx.fillRect(0, 0, w, h);
+            const entry = craftPhotoEntries[prodId];
+            if (!entry) {
+                // Loading placeholder, then render once photo + mask are ready
+                ctx.fillStyle = '#F7F4EE';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#8A8178';
+                ctx.font = `bold ${Math.round(canvas.width / 26)}px "Be Vietnam Pro", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText(currentLang === 'vi' ? 'Đang tải ảnh mẫu…' : 'Loading photo…', canvas.width / 2, canvas.height / 2);
+                loadCraftPhotoBase(prodId).then(() => {
+                    if (token === craftRenderToken) renderCraftCustomCanvas();
+                }).catch(() => {
+                    if (token !== craftRenderToken) return;
+                    ctx.fillStyle = '#F7F4EE';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#B2533E';
+                    ctx.fillText(currentLang === 'vi' ? 'Không tải được ảnh mẫu' : 'Could not load photo', canvas.width / 2, canvas.height / 2);
+                });
+                return;
+            }
 
-            const isDoll = baseProd.id === 'HM-DOLL-ROSE-01';
-            const isPouch = baseProd.id === 'HM-POUCH-CAT-06';
-            const isHatSet = baseProd.id === 'HM-SET-YELLOW-07';
+            const { W, H } = entry;
+            if (canvas.width !== W || canvas.height !== H) {
+                canvas.width = W;
+                canvas.height = H;
+            }
 
-            if (isDoll) {
-                // Draw Customizable Linen Doll with chosen yarn hair & dress color
-                ctx.fillStyle = pal.hex;
-                ctx.beginPath();
-                ctx.ellipse(105, 235, 52, 68, 0.35, 0, Math.PI * 2);
-                ctx.ellipse(275, 235, 52, 68, -0.35, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Linen Legs & Arms
-                ctx.fillStyle = '#E8DFD1';
-                ctx.beginPath();
-                ctx.roundRect(158, 330, 26, 70, 12);
-                ctx.roundRect(196, 330, 26, 70, 12);
-                ctx.ellipse(125, 255, 16, 48, 0.35, 0, Math.PI * 2);
-                ctx.ellipse(255, 255, 16, 48, -0.35, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Dress in selected color + lace trim
-                ctx.fillStyle = pal.hex;
-                ctx.beginPath();
-                ctx.moveTo(150, 200);
-                ctx.lineTo(230, 200);
-                ctx.lineTo(275, 335);
-                ctx.lineTo(105, 335);
-                ctx.closePath();
-                ctx.fill();
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(105, 320, 170, 26);
-
-                // Linen Head & Eyes
-                ctx.fillStyle = '#EFE7DA';
-                ctx.beginPath();
-                ctx.arc(190, 148, 56, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#222';
-                ctx.fillRect(168, 142, 6, 15);
-                ctx.fillRect(206, 142, 6, 15);
-                // Bangs
-                ctx.fillStyle = pal.accent;
-                ctx.beginPath();
-                ctx.arc(190, 136, 60, Math.PI, 0);
-                ctx.fill();
-
-            } else if (isPouch) {
-                // Draw Customizable Chubby Cat / Pet Zipper Pouch in chosen color
-                ctx.fillStyle = pal.hex;
-                ctx.beginPath();
-                ctx.ellipse(190, 240, 108, 125, 0, 0, Math.PI * 2);
-                ctx.fill();
-                // Ears
-                ctx.beginPath();
-                ctx.moveTo(115, 140); ctx.lineTo(150, 80); ctx.lineTo(185, 125);
-                ctx.moveTo(205, 125); ctx.lineTo(250, 85); ctx.lineTo(268, 150);
-                ctx.fill();
-                // Tail
-                ctx.fillStyle = pal.accent;
-                ctx.beginPath();
-                ctx.roundRect(65, 340, 105, 28, 14);
-                ctx.fill();
-                // Paws & Eyes
-                ctx.fillStyle = pal.accent;
-                ctx.beginPath();
-                ctx.roundRect(110, 185, 45, 85, 22);
-                ctx.roundRect(225, 195, 45, 85, 22);
-                ctx.fill();
-                ctx.fillStyle = '#1E1B18';
-                ctx.beginPath();
-                ctx.arc(165, 150, 9, 0, Math.PI * 2);
-                ctx.arc(220, 155, 9, 0, Math.PI * 2);
-                ctx.fill();
-
+            if (entry.canRecolor) {
+                ctx.putImageData(getRecoloredCraftImage(entry), 0, 0);
             } else {
-                // Draw Crochet Handbag (and optional Matching Sun Hat if Set)
-                if (isHatSet) {
-                    ctx.fillStyle = pal.hex;
-                    ctx.beginPath();
-                    ctx.arc(190, 125, 78, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = pal.accent;
-                    ctx.beginPath();
-                    ctx.arc(190, 125, 38, 0, Math.PI * 2);
-                    ctx.fill();
-                } else {
-                    // Bag Handles
-                    ctx.strokeStyle = pal.hex;
-                    ctx.lineWidth = 16;
-                    ctx.beginPath();
-                    ctx.arc(190, 130, 55, Math.PI, 0);
-                    ctx.stroke();
-                }
-
-                // Crochet Bag Body in selected Primary Color
-                const bagTop = isHatSet ? 215 : 135;
-                const bagHeight = isHatSet ? 175 : 245;
-                ctx.fillStyle = pal.hex;
-                ctx.beginPath();
-                ctx.roundRect(55, bagTop, 270, bagHeight, 24);
-                ctx.fill();
-
-                // Realistic Crochet Stitch Texture Grid
-                ctx.fillStyle = 'rgba(255,255,255,0.16)';
-                for (let r = 0; r < bagHeight - 25; r += 14) {
-                    for (let c = 0; c < 240; c += 14) {
-                        ctx.beginPath();
-                        ctx.arc(70 + c, bagTop + 16 + r, 3.2, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
+                ctx.drawImage(entry.photo, 0, 0, W, H);
+                if (!entry.base && craftState.zoneColors.some(Boolean) && !renderCraftCustomCanvas.warned) {
+                    renderCraftCustomCanvas.warned = true;
+                    showToast(currentLang === 'vi'
+                        ? 'Hãy mở trang qua máy chủ web (không phải file://) để xem phối màu.'
+                        : 'Open the site through a web server (not file://) to preview colors.');
                 }
             }
 
-            // Draw Selected 3D Motif or User's Uploaded Image in Center
-            const centerY = isHatSet ? 300 : 255;
-            if (craftState.motif === 'custom_img' && craftState.customUploadedImg) {
+            // Pet photo patch: round, with a stitched yarn border
+            const [px, py, pr] = entry.cfg.patch;
+            if (craftState.customUploadedImg) {
+                const img = craftState.customUploadedImg;
+                const side = Math.min(img.naturalWidth, img.naturalHeight);
+                ctx.save();
+                ctx.shadowColor = 'rgba(0,0,0,0.35)';
+                ctx.shadowBlur = pr * 0.25;
+                ctx.shadowOffsetY = pr * 0.06;
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath();
+                ctx.arc(px, py, pr + pr * 0.12, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
                 ctx.save();
                 ctx.beginPath();
-                ctx.arc(190, centerY, 68, 0, Math.PI * 2);
+                ctx.arc(px, py, pr, 0, Math.PI * 2);
                 ctx.clip();
-                ctx.drawImage(craftState.customUploadedImg, 122, centerY - 68, 136, 136);
+                ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side,
+                    px - pr, py - pr, pr * 2, pr * 2);
                 ctx.restore();
-                // Stitched border around uploaded photo
-                ctx.strokeStyle = '#FFFFFF';
-                ctx.lineWidth = 4;
-                ctx.setLineDash([6, 4]);
+                ctx.strokeStyle = '#C86D51';
+                ctx.lineWidth = Math.max(2, pr * 0.06);
+                ctx.setLineDash([pr * 0.12, pr * 0.08]);
                 ctx.beginPath();
-                ctx.arc(190, centerY, 68, 0, Math.PI * 2);
+                ctx.arc(px, py, pr + pr * 0.06, 0, Math.PI * 2);
                 ctx.stroke();
                 ctx.setLineDash([]);
-            } else if (craftState.motif === 'sakura') {
-                ctx.strokeStyle = '#C59B27';
-                ctx.lineWidth = 7;
-                ctx.beginPath();
-                ctx.moveTo(95, centerY + 65);
-                ctx.quadraticCurveTo(195, centerY, 275, centerY - 65);
-                ctx.stroke();
-                [[145, centerY + 20, '#F48FB1'], [190, centerY - 5, '#FFFFFF'], [235, centerY - 30, '#F8BBD0'], [265, centerY - 55, '#F48FB1']].forEach(([bx, by, col]) => {
-                    ctx.fillStyle = col;
-                    for (let p = 0; p < 5; p++) {
-                        ctx.beginPath();
-                        ctx.arc(bx + Math.cos((p * 2 * Math.PI) / 5) * 9, by + Math.sin((p * 2 * Math.PI) / 5) * 9, 7, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                });
-            } else if (craftState.motif === 'sunflower') {
-                [[135, centerY], [245, centerY], [190, centerY - 45]].forEach(([sx, sy]) => {
-                    ctx.fillStyle = '#FFC107';
-                    for (let a = 0; a < 10; a++) {
-                        ctx.beginPath();
-                        ctx.arc(sx + Math.cos((a * Math.PI) / 5) * 18, sy + Math.sin((a * Math.PI) / 5) * 18, 8, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                    ctx.fillStyle = '#3E2723';
-                    ctx.beginPath();
-                    ctx.arc(sx, sy, 11, 0, Math.PI * 2);
-                    ctx.fill();
-                });
-            } else if (craftState.motif === 'ocean') {
-                // Jellyfish & Blue Starfish
-                ctx.fillStyle = '#FFF176';
-                ctx.beginPath();
-                ctx.arc(135, centerY - 20, 22, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#00B0FF';
-                ctx.beginPath();
-                ctx.arc(248, centerY - 15, 20, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#FFD600';
-                ctx.beginPath();
-                ctx.ellipse(190, centerY + 25, 20, 13, 0, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (craftState.motif === 'cat') {
-                // Cute Applique Cat Face
-                ctx.fillStyle = '#FFE0B2';
-                ctx.beginPath();
-                ctx.arc(190, centerY, 45, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#222';
-                ctx.beginPath();
-                ctx.arc(174, centerY - 6, 5, 0, Math.PI * 2);
-                ctx.arc(206, centerY - 6, 5, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (craftState.motif === 'bow') {
-                // Oversized Sculpted Crochet Bow
-                ctx.fillStyle = pal.accent;
-                ctx.beginPath();
-                ctx.moveTo(190, centerY - 25);
-                ctx.lineTo(130, centerY - 55);
-                ctx.lineTo(130, centerY + 5);
-                ctx.closePath();
-                ctx.moveTo(190, centerY - 25);
-                ctx.lineTo(250, centerY - 55);
-                ctx.lineTo(250, centerY + 5);
-                ctx.closePath();
-                ctx.fill();
             }
 
-            // Draw Custom Embroidered Name Tag if entered
+            // Embroidered name tag (scaled to photo size)
             if (craftState.customText) {
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+                const s = W / 380;
+                ctx.save();
+                ctx.shadowColor = 'rgba(0,0,0,0.25)';
+                ctx.shadowBlur = 8 * s;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.94)';
                 ctx.beginPath();
-                ctx.roundRect(110, h - 52, 160, 32, 10);
+                ctx.roundRect(W / 2 - 85 * s, H - 52 * s, 170 * s, 32 * s, 10 * s);
                 ctx.fill();
+                ctx.restore();
                 ctx.strokeStyle = '#C86D51';
-                ctx.lineWidth = 1.5;
+                ctx.lineWidth = 1.5 * s;
+                ctx.setLineDash([4 * s, 3 * s]);
+                ctx.beginPath();
+                ctx.roundRect(W / 2 - 81 * s, H - 48 * s, 162 * s, 24 * s, 8 * s);
                 ctx.stroke();
-
+                ctx.setLineDash([]);
                 ctx.fillStyle = '#23262A';
-                ctx.font = 'bold 14px "Be Vietnam Pro", sans-serif';
+                ctx.font = `bold ${Math.round(14 * s)}px "Be Vietnam Pro", sans-serif`;
                 ctx.textAlign = 'center';
-                ctx.fillText('✨ ' + craftState.customText, 190, h - 31);
+                ctx.fillText(craftState.customText, W / 2, H - 31 * s);
             }
+        }
 
-            // Update Live Summary Labels & Price
-            const motifLabels = {
-                sakura: currentLang === 'vi' ? 'Hoa Đào 3D' : '3D Sakura',
-                sunflower: currentLang === 'vi' ? 'Hướng Dương' : 'Sunflower',
-                ocean: currentLang === 'vi' ? 'Sứa & Sao Biển' : 'Ocean Life',
-                cat: currentLang === 'vi' ? 'Mèo Cam 3D' : 'Orange Tabby',
-                bow: currentLang === 'vi' ? 'Nơ Bản Lớn' : 'Statement Bow',
-                custom_img: currentLang === 'vi' ? 'Ảnh Riêng Của Khách' : 'Custom Uploaded Photo'
-            };
+        function updateCraftSummary() {
+            const baseProd = products.find(p => p.id === craftState.baseProductId) || products[0];
             const baseTitle = currentLang === 'vi' ? baseProd.title_vi : baseProd.title_en;
-            const colorName = currentLang === 'vi' ? pal.vi : pal.en;
-            const finalPrice = getCustomizedCraftPrice();
-
+            const patchLabel = craftState.customUploadedImg ? (currentLang === 'vi' ? ' • Đính ảnh riêng' : ' • Photo patch') : '';
             document.getElementById('craftSummaryTitle').textContent = baseTitle;
             document.getElementById('craftSummarySpecs').textContent =
-                `${colorName} • ${motifLabels[craftState.motif]} • Size ${craftState.size}${craftState.customText ? ` • "${craftState.customText}"` : ''}`;
-            document.getElementById('craftSummaryPrice').textContent = formatPrice(finalPrice);
+                `${describeCraftColors()}${patchLabel} • Size ${craftState.size}${craftState.customText ? ` • "${craftState.customText}"` : ''}`;
+            document.getElementById('craftSummaryPrice').textContent = formatPrice(getCustomizedCraftPrice());
         }
 
         function addCustomizedHandmadeToCart() {
             const baseProd = products.find(p => p.id === craftState.baseProductId) || products[0];
-            const pal = craftPalettes.find(c => c.id === craftState.colorId) || craftPalettes[0];
             const canvas = document.getElementById('craftCustomCanvas');
-            const customImgUrl = canvas.toDataURL('image/jpeg', 0.9);
+            let customImgUrl = null;
+            try {
+                // cart thumbnail: downscale to keep memory small
+                const thumb = document.createElement('canvas');
+                thumb.width = 480;
+                thumb.height = Math.round(480 * canvas.height / canvas.width);
+                thumb.getContext('2d').drawImage(canvas, 0, 0, thumb.width, thumb.height);
+                customImgUrl = thumb.toDataURL('image/jpeg', 0.88);
+            } catch (err) {
+                customImgUrl = null; // tainted canvas (file://) → cart falls back to the catalog image
+            }
             const finalPrice = getCustomizedCraftPrice();
 
             const customId = `${baseProd.id}-CUSTOM-${Date.now()}`;
-            const colorVi = pal.vi;
-            const colorEn = pal.en;
+            const lang = currentLang;
+            currentLang = 'vi';
+            const colorsVi = describeCraftColors();
+            currentLang = 'en';
+            const colorsEn = describeCraftColors();
+            currentLang = lang;
+            const patchVi = craftState.customUploadedImg ? ', đính ảnh riêng' : '';
+            const patchEn = craftState.customUploadedImg ? ', photo patch' : '';
             const nameNoteVi = craftState.customText ? ` (Thêu tên: ${craftState.customText})` : '';
             const nameNoteEn = craftState.customText ? ` (Name: ${craftState.customText})` : '';
 
@@ -1037,11 +1148,11 @@ function saveCurrencyToStorage() {
                 id: customId,
                 code: `${baseProd.code}-${craftState.size}`,
                 priceVND: finalPrice,
-                title_vi: `${baseProd.title_vi} [Phối màu: ${colorVi}, Size ${craftState.size}]${nameNoteVi}`,
-                title_en: `${baseProd.title_en} [Color: ${colorEn}, Size ${craftState.size}]${nameNoteEn}`
+                title_vi: `${baseProd.title_vi} [${colorsVi}${patchVi}, Size ${craftState.size}]${nameNoteVi}`,
+                title_en: `${baseProd.title_en} [${colorsEn}${patchEn}, Size ${craftState.size}]${nameNoteEn}`
             };
 
-            customPhotoMap[customId] = customImgUrl;
+            if (customImgUrl) customPhotoMap[customId] = customImgUrl;
             cart.push({ product: customizedProduct, qty: 1 });
             renderCart();
             closeHandmadeCustomizer();

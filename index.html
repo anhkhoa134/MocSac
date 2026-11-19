@@ -1092,7 +1092,7 @@
                     <!-- Larger Canvas & Scale Reference -->
                     <div class="relative flex items-end justify-center gap-4 sm:gap-6 my-4 sm:my-8">
                         <div id="craftCanvasWrapper" class="transition-transform duration-300 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border-2 sm:border-4 border-white bg-white">
-                            <canvas id="craftCustomCanvas" width="380" height="440" class="w-[220px] sm:w-[340px] h-auto block"></canvas>
+                            <canvas id="craftCustomCanvas" width="800" height="800" class="w-[260px] sm:w-[420px] h-auto block"></canvas>
                         </div>
 
                         <!-- Phone Scale Reference -->
@@ -1141,38 +1141,28 @@
                         <!-- 2. Yarn Color -->
                         <div>
                             <div class="flex items-center justify-between text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-slateart mb-1.5 sm:mb-2">
-                                <span data-i18n="craftStep2">2. Đổi Màu Sợi Len / Vải</span>
+                                <span data-i18n="craftStep2">2. Chọn Vùng &amp; Đổi Màu Sợi Len</span>
                                 <span id="craftColorNameLabel" class="text-terracotta font-bold normal-case">Đen Tuyền</span>
                             </div>
+                            <div id="craftZoneTabs" class="hidden flex flex-wrap gap-1.5 mb-2.5"></div>
                             <div class="flex flex-wrap items-center gap-2 sm:gap-2.5" id="craftColorSwatches"></div>
                         </div>
 
-                        <!-- 3. 3D Motif or Custom Photo -->
+                        <!-- 3. Pet Photo Patch -->
                         <div>
                             <label class="block text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-slateart mb-1.5 sm:mb-2" data-i18n="craftStep3">
-                                3. Chọn Họa Tiết Đính Nổi Hoặc Tải Ảnh Lên
+                                3. Đính Ảnh Thú Cưng (Tuỳ Chọn)
                             </label>
-                            <div class="grid grid-cols-2 gap-2 text-xs" id="craftMotifButtons">
-                                <button type="button" onclick="setCraftMotif('sakura')" id="motif-sakura" class="motif-btn px-2.5 py-2 rounded-xl border border-stone-300 bg-linen font-semibold text-left flex items-center gap-1.5 text-xs">
-                                    🌸 <span>Hoa Đào 3D</span>
-                                </button>
-                                <button type="button" onclick="setCraftMotif('sunflower')" id="motif-sunflower" class="motif-btn px-2.5 py-2 rounded-xl border border-stone-300 bg-linen font-semibold text-left flex items-center gap-1.5 text-xs">
-                                    🌻 <span>Hướng Dương</span>
-                                </button>
-                                <button type="button" onclick="setCraftMotif('ocean')" id="motif-ocean" class="motif-btn px-2.5 py-2 rounded-xl border border-stone-300 bg-linen font-semibold text-left flex items-center gap-1.5 text-xs">
-                                    🪼 <span>Sứa & Sao</span>
-                                </button>
-                                <button type="button" onclick="setCraftMotif('cat')" id="motif-cat" class="motif-btn px-2.5 py-2 rounded-xl border border-stone-300 bg-linen font-semibold text-left flex items-center gap-1.5 text-xs">
-                                    🐱 <span>Mèo Cam Cưng</span>
-                                </button>
-                                <button type="button" onclick="setCraftMotif('bow')" id="motif-bow" class="motif-btn px-2.5 py-2 rounded-xl border border-stone-300 bg-linen font-semibold text-left flex items-center gap-1.5 text-xs">
-                                    🎀 <span>Nơ Bản To</span>
-                                </button>
-                                <label class="px-2.5 py-2 rounded-xl border-2 border-dashed border-terracotta bg-terracotta/10 hover:bg-terracotta/20 text-terracotta font-bold cursor-pointer flex items-center gap-1.5 text-xs transition-colors">
+                            <div class="flex flex-wrap items-center gap-2 text-xs">
+                                <label class="px-3 py-2 rounded-xl border-2 border-dashed border-terracotta bg-terracotta/10 hover:bg-terracotta/20 text-terracotta font-bold cursor-pointer flex items-center gap-1.5 text-xs transition-colors">
                                     <i class="fa-solid fa-camera"></i>
                                     <span data-i18n="uploadCustomMotifBtn">Tải ảnh thú cưng</span>
                                     <input type="file" accept="image/*" class="hidden" onchange="uploadCraftCustomImage(event)">
                                 </label>
+                                <button type="button" id="craftRemovePatchBtn" onclick="removeCraftCustomImage()" class="hidden px-3 py-2 rounded-xl border border-stone-300 bg-linen hover:border-slateart font-semibold text-slateart flex items-center gap-1.5">
+                                    <i class="fa-solid fa-xmark"></i>
+                                    <span data-i18n="removePatchBtn">Bỏ ảnh</span>
+                                </button>
                             </div>
                         </div>
 
