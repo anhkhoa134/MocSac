@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recolor prototype</title>
+<style>
+  body { font-family: system-ui, sans-serif; background:#F6F2EA; color:#1E2024; margin:0; padding:16px; }
+  .row { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; }
+  canvas { max-width: 100%; width: 420px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.15); cursor: crosshair; }
+  .panel { max-width: 360px; }
+  .sw { width:34px; height:34px; border-radius:50%; border:2px solid #ccc; cursor:pointer; display:inline-block; margin:3px; }
+  .sw.on { border-color:#B2533E; transform:scale(1.12); }
+  label { display:block; font-size:12px; font-weight:700; margin-top:12px; text-transform:uppercase; letter-spacing:.04em; }
+  select, input[type=range] { width:100%; }
+  small { color:#666; }
+</style>
+</head>
+<body>
+<h3>Prototype: tô màu trên ảnh thật (giữ vân len)</h3>
+<div class="row">
+  <div>
+    <canvas id="out"></canvas>
+    <div><small>Click vào thân túi để chọn vùng (flood fill theo màu). Shift+click để thêm vùng.</small></div>
+  </div>
+  <div class="panel">
+    <label>Ảnh sản phẩm</label>
+    <select id="pick"></select>
+    <label>Độ nhạy chọn vùng: <span id="tolv"></span></label>
+    <input id="tol" type="range" min="4" max="40" value="16">
+    <label>Màu len</label>
+    <div id="sws"></div>
+    <label><input type="checkbox" id="showMask"> Hiện mask</label>
+    <label>Giữ độ tương phản vân len: <span id="kv"></span></label>
+    <input id="k" type="range" min="40" max="160" value="100">
+  </div>
+</div>
+<script>
+const IMAGES = [
+  ['../img/products/len-01-tui-no-be.jpg', [400, 470]],
+  ['../img/products/len-13-tui-tim-no-hong.jpg', [590, 690]],
+  ['../img/products/len-08-tui-meo-kem.jpg', null],
+  ['../img/products/len-09-tui-meo-cam.jpg', null],
+  ['../img/products/len-04-tui-hoa-sen.jpg', null],
+  ['../img/products/len-12-tui-hoa-dao.jpg', null],
+];
+const PALETTE = [
+  ['Đen Tuyền','#26282C'],['Hồng Phấn','#F4A6BE'],['Hồng Cánh Sen','#C2185B'],['Vàng Nắng','#F2C94C'],
+  ['Nâu Linen','#9A8B7A'],['Kem','#EEDCC2'],['Xanh Mạ','#7FA650'],['Xanh Biển','#2B7BB9'],['Tím Oải Hương','#9C7BC4'],['Đỏ Đô','#8E2430']
+];
+let img, W, H, srcLab, mask, color = null, seeds = [];
+const out = document.getElementById('out'), ctx = out.getContext('2d', { willReadFrequently: true });
+
+// --- sRGB <-> CIELAB ---
+function s2l(c){ c/=255; return c<=0.04045? c/12.92 : Math.pow((c+0.055)/1.055,2.4); }
+function l2s(c){ c = c<=0.0031308? 12.92*c : 1.055*Math.pow(c,1/2.4)-0.055; return Math.max(0,Math.min(255,Math.round(c*255))); }
+function f(t){ return t>0.008856? Math.cbrt(t) : 7.787*t+16/116; }
+function fi(t){ const t3=t*t*t; return t3>0.008856? t3 : (t-16/116)/7.787; }
+function rgb2lab(r,g,b){
+  r=s2l(r); g=s2l(g); b=s2l(b);
+  const x=(r*0.4124+g*0.3576+b*0.1805)/0.95047, y=r*0.2126+g*0.7152+b*0.0722, z=(r*0.0193+g*0.1192+b*0.9505)/1.08883;
+  const fx=f(x), fy=f(y), fz=f(z);
+  return [116*fy-16, 500*(fx-fy), 200*(fy-fz)];
+}
+function lab2rgb(L,a,b){
+  const fy=(L+16)/116, fx=fy+a/500, fz=fy-b/200;
+  const x=fi(fx)*0.95047, y=fi(fy), z=fi(fz)*1.08883;
+  return [l2s(x*3.2406+y*-1.5372+z*-0.4986), l2s(x*-0.9689+y*1.8758+z*0.0415), l2s(x*0.0557+y*-0.2040+z*1.0570)];
+}
+function hex2lab(h){ const n=parseInt(h.slice(1),16); return rgb2lab(n>>16,(n>>8)&255,n&255); }
+
+function load(i){
+  img = new Image();
+  img.onload = () => {
+    W = out.width = img.naturalWidth; H = out.height = img.naturalHeight;
+    ctx.drawImage(img,0,0);
+    const d = ctx.getImageData(0,0,W,H).data;
+    srcLab = new Float32Array(W*H*3);
+    for (let p=0,q=0; p<d.length; p+=4,q+=3){ const l=rgb2lab(d[p],d[p+1],d[p+2]); srcLab[q]=l[0]; srcLab[q+1]=l[1]; srcLab[q+2]=l[2]; }
+    mask = new Float32Array(W*H); seeds = [];
+    if (IMAGES[i][1]) { seeds=[IMAGES[i][1]]; buildMask(); }
+    render();
+  };
+  img.src = IMAGES[i][0];
+}
+
+// Flood fill on chroma (a,b) + loose L, from seeds; then dilate+blur for soft edges
+function buildMask(){
+  const tol = +document.getElementById('tol').value;
+  const hard = new Uint8Array(W*H);
+  for (const [sx,sy] of seeds){
+    // reference = median-ish average of 9x9 around seed
+    let ra=0, rb=0, rl=0, n=0;
+    for (let y=sy-4;y<=sy+4;y++) for (let x=sx-4;x<=sx+4;x++){ const q=(y*W+x)*3; rl+=srcLab[q]; ra+=srcLab[q+1]; rb+=srcLab[q+2]; n++; }
+    ra/=n; rb/=n; rl/=n;
+    const stack=[sy*W+sx];
+    while(stack.length){
+      const i=stack.pop(); if (hard[i]) continue;
+      const q=i*3, da=srcLab[q+1]-ra, db=srcLab[q+2]-rb, dl=(srcLab[q]-rl)*0.35;
+      if (Math.sqrt(da*da+db*db+dl*dl) > tol) continue;
+      hard[i]=1; const x=i%W, y=(i/W)|0;
+      if(x>0)stack.push(i-1); if(x<W-1)stack.push(i+1); if(y>0)stack.push(i-W); if(y<H-1)stack.push(i+W);
+    }
+  }
+  // close small holes (stitch shadows): dilate 2 then erode 2, then box blur 2
+  let m = morph(morph(hard,3,true),3,false);
+  mask = blur(m, 2);
+}
+function morph(src,r,dil){
+  const o=new Uint8Array(W*H);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    let v=dil?0:1;
+    for(let dy=-r;dy<=r&&(dil?!v:v);dy++)for(let dx=-r;dx<=r;dx++){
+      const xx=x+dx, yy=y+dy; if(xx<0||yy<0||xx>=W||yy>=H) continue;
+      const s=src[yy*W+xx]; if(dil&&s){v=1;break;} if(!dil&&!s){v=0;break;}
+    }
+    o[y*W+x]=v;
+  }
+  return o;
+}
+function blur(src,r){
+  const o=new Float32Array(W*H);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){ let s=0,n=0;
+    for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){ const xx=x+dx,yy=y+dy; if(xx<0||yy<0||xx>=W||yy>=H)continue; s+=src[yy*W+xx]; n++; }
+    o[y*W+x]=s/n; }
+  return o;
+}
+
+function render(){
+  ctx.drawImage(img,0,0);
+  const id = ctx.getImageData(0,0,W,H), d = id.data;
+  const showMask = document.getElementById('showMask').checked;
+  if (showMask){
+    for (let i=0;i<W*H;i++){ const p=i*4, m=mask[i]; d[p]=d[p]*(1-m)+255*m*0.5+d[p]*m*0.5; d[p+1]*= (1-m*0.6); d[p+2]*=(1-m*0.6); }
+  } else if (color) {
+    const [Lt,at,bt] = hex2lab(color);
+    // mean L of source region
+    let sum=0, n=0; for (let i=0;i<W*H;i++) if(mask[i]>0.5){ sum+=srcLab[i*3]; n++; }
+    const Ls = n? sum/n : 50;
+    // dark targets: shrink texture so black stays black; light targets: keep it
+    const k = (+document.getElementById('k').value/100) * (0.45 + 0.55*Math.min(1, Lt/60));
+    for (let i=0;i<W*H;i++){
+      const m = mask[i]; if (m<=0.001) continue;
+      const q=i*3, L = Lt + (srcLab[q]-Ls)*k;
+      // keep a touch of original chroma variation for natural look
+      const a = at + (srcLab[q+1]-at)*0.0, b = bt + (srcLab[q+2]-bt)*0.0;
+      const [r,g,bb] = lab2rgb(Math.max(0,Math.min(100,L)), a, b);
+      const p=i*4; d[p]=d[p]*(1-m)+r*m; d[p+1]=d[p+1]*(1-m)+g*m; d[p+2]=d[p+2]*(1-m)+bb*m;
+    }
+  }
+  ctx.putImageData(id,0,0);
+}
+
+out.addEventListener('click', e => {
+  const r = out.getBoundingClientRect();
+  const pt = [Math.round((e.clientX-r.left)*W/r.width), Math.round((e.clientY-r.top)*H/r.height)];
+  seeds = e.shiftKey ? [...seeds, pt] : [pt];
+  buildMask(); render();
+});
+document.getElementById('tol').oninput = e => { document.getElementById('tolv').textContent=e.target.value; if(seeds.length){buildMask(); render();} };
+document.getElementById('k').oninput = e => { document.getElementById('kv').textContent=e.target.value+'%'; render(); };
+document.getElementById('showMask').onchange = render;
+const pick = document.getElementById('pick');
+IMAGES.forEach(([s],i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=s.split('/').pop(); pick.appendChild(o); });
+pick.onchange = () => load(+pick.value);
+document.getElementById('sws').innerHTML = PALETTE.map(([n,h])=>`<span class="sw" title="${n}" data-h="${h}" style="background:${h}"></span>`).join('');
+document.querySelectorAll('.sw').forEach(s => s.onclick = () => { color=s.dataset.h; document.querySelectorAll('.sw').forEach(x=>x.classList.remove('on')); s.classList.add('on'); render(); });
+document.getElementById('tolv').textContent=16; document.getElementById('kv').textContent='100%';
+load(0);
+</script>
+</body>
+</html>
