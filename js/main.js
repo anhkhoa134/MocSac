@@ -649,15 +649,16 @@ function saveCurrencyToStorage() {
         };
 
         // ---- Bước 4: phụ kiện ghép lên ảnh thật ----
-        // Ảnh phụ kiện hiện là hình minh hoạ SVG. Khi có ảnh chụp thật: tách nền thành PNG trong suốt,
-        // đặt vào img/accessories/ rồi đổi `src` (và `pivot` = điểm khoen treo / tâm, tính theo 0–1 của ảnh phụ kiện).
+        // Chỉ món có ảnh chụp thật mới hiện cho khách. Món `draft: true` dùng hình minh hoạ SVG nên đang ẩn:
+        // khi có ảnh thật, tách nền thành PNG trong suốt, đặt vào img/accessories/, đổi `src`
+        // (và `pivot` = điểm khoen treo / tâm, tính theo 0–1 của ảnh phụ kiện) rồi xoá `draft`.
         const craftAccessories = [
             // Ảnh thật: tách nền từ img/products/full_len-07-moc-khoa-meo.jpg (Apple Vision + viền cắt tay), khoen & dây vẽ thêm.
             { id: 'charm-cat', vi: 'Móc khoá mèo', en: 'Cat charm', type: 'hang', src: 'img/accessories/charm-cat-len07.png', width: 0.11, pivot: [0.515, 0.032], priceVND: 45000 },
-            { id: 'charm-heart', vi: 'Charm tim', en: 'Heart charm', type: 'hang', src: 'img/accessories/charm-heart.svg', width: 0.085, pivot: [0.5, 0.093], priceVND: 35000 },
-            { id: 'charm-pompom', vi: 'Pompom len', en: 'Yarn pompom', type: 'hang', src: 'img/accessories/charm-pompom.svg', width: 0.095, pivot: [0.5, 0.088], priceVND: 30000 },
-            { id: 'pin-daisy', vi: 'Huy hiệu cúc', en: 'Daisy pin', type: 'surface', src: 'img/accessories/pin-daisy.svg', width: 0.10, pivot: [0.5, 0.5], priceVND: 25000 },
-            { id: 'bow-ribbon', vi: 'Nơ satin', en: 'Satin bow', type: 'surface', src: 'img/accessories/bow-ribbon.svg', width: 0.14, pivot: [0.5, 0.5], priceVND: 30000 }
+            { id: 'charm-heart', draft: true, vi: 'Charm tim', en: 'Heart charm', type: 'hang', src: 'img/accessories/charm-heart.svg', width: 0.085, pivot: [0.5, 0.093], priceVND: 35000 },
+            { id: 'charm-pompom', draft: true, vi: 'Pompom len', en: 'Yarn pompom', type: 'hang', src: 'img/accessories/charm-pompom.svg', width: 0.095, pivot: [0.5, 0.088], priceVND: 30000 },
+            { id: 'pin-daisy', draft: true, vi: 'Huy hiệu cúc', en: 'Daisy pin', type: 'surface', src: 'img/accessories/pin-daisy.svg', width: 0.10, pivot: [0.5, 0.5], priceVND: 25000 },
+            { id: 'bow-ribbon', draft: true, vi: 'Nơ satin', en: 'Satin bow', type: 'surface', src: 'img/accessories/bow-ribbon.svg', width: 0.14, pivot: [0.5, 0.5], priceVND: 30000 }
         ];
         const CRAFT_MAX_SURFACE_ITEMS = 4;
 
@@ -1329,7 +1330,7 @@ function saveCurrencyToStorage() {
                           : 'Accessories are not available for this piece yet — add a note with your order.');
             }
 
-            tray.innerHTML = craftAccessories.map(acc => `
+            tray.innerHTML = craftAccessories.filter(acc => !acc.draft).map(acc => `
                 <button type="button" onclick="addCraftAccessory('${acc.id}')"
                     class="flex flex-col items-center gap-1 p-2 rounded-xl border border-stone-300 bg-linen hover:border-terracotta transition-colors">
                     <img src="${acc.src}" alt="" class="h-9 w-9 object-contain pointer-events-none">
