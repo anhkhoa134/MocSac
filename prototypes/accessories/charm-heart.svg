@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="150" viewBox="0 0 80 150">
+  <!-- Hanging charm: split ring (pivot at top centre) + chain + enamel heart. Placeholder art. -->
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F3D58A"/><stop offset=".5" stop-color="#C9952F"/><stop offset="1" stop-color="#8A6418"/>
+    </linearGradient>
+    <radialGradient id="heart" cx=".35" cy=".3" r=".8">
+      <stop offset="0" stop-color="#F7B9CC"/><stop offset=".55" stop-color="#E07A9B"/><stop offset="1" stop-color="#B24D72"/>
+    </radialGradient>
+  </defs>
+  <circle cx="40" cy="14" r="10" fill="none" stroke="url(#gold)" stroke-width="4"/>
+  <path d="M33 7a10 10 0 0 1 12-2" fill="none" stroke="#FFF3CF" stroke-width="1.4" stroke-linecap="round"/>
+  <g fill="none" stroke="url(#gold)" stroke-width="2.6">
+    <ellipse cx="40" cy="30" rx="3.2" ry="5"/>
+    <ellipse cx="40" cy="39" rx="2" ry="5"/>
+    <ellipse cx="40" cy="48" rx="3.2" ry="5"/>
+    <ellipse cx="40" cy="57" rx="2" ry="5"/>
+  </g>
+  <circle cx="40" cy="65" r="4" fill="none" stroke="url(#gold)" stroke-width="2.6"/>
+  <path d="M40 142C40 142 8 118 8 92c0-12 9-21 20-21 6 0 10 3 12 7 2-4 6-7 12-7 11 0 20 9 20 21 0 26-32 50-32 50z"
+        fill="url(#heart)" stroke="url(#gold)" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M20 88c1-6 6-10 11-9" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="4" stroke-linecap="round"/>
+</svg>
